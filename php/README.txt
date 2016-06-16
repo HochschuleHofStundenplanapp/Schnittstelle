@@ -1,0 +1,2 @@
+Die verwendeten SQL-Statments wurden für eine MySQL Datenbank entworfen und funktionieren auch nur dort. 
+Bei Verwendung einer anderen Datenbank müssen die Abfrage auf die spezielle Datenbank angepasst werden!
