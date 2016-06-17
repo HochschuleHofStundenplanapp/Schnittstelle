@@ -206,6 +206,7 @@ function getChanges($stgnr, $semester) {
             . " ON Studiengaenge.STGNR = Verlegungen_WWW.STGNR "
             . "WHERE (Studiengaenge.STGNR = :stgnr) "
             . " AND (Verlegungen_WWW.Fachsemester = :semester) "
+            . " AND (DATE(Verlegungen_WWW.Ausfalldatum)>=NOW() OR DATE(Verlegungen_WWW.Ersatzdatum)>=NOW()) "
             . "ORDER BY ausfalldatum, ausfallzeit";
 
     $stmt = $pdo->prepare($sql);
@@ -214,7 +215,7 @@ function getChanges($stgnr, $semester) {
     $stmt->execute();
     $result = array();
     while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
-        if($row['ausfallzeit']!= null && new DateTime($row['ersatzdatum'])> new DateTime()){
+        if($row['ausfallzeit']!= null){
         $result[] = array(
             "label"=>$row['bezeichnung'], 
             "docent" => $row['dozent'],             
@@ -233,7 +234,7 @@ function getChanges($stgnr, $semester) {
                 "date" => $row['ersatzdatum'], 
                 "room" => $row['ersatzraum']): null,            
             );
-        };
+        }
     }
     // Datenbankverbindung schließen
     $pdo = null;
