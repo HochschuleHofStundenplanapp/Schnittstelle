@@ -2,7 +2,7 @@
 // SoapClient
 try {
     $options = array(
-        "location" => "http://localhost/server.php",
+        "location" => "http://localhost/project/server.php",
         "uri" => "http://test-uri",
         'encoding' => 'UTF-8',
 #        'encoding' => 'ISO-8859-15',
@@ -21,38 +21,44 @@ try {
 try {
 // Mehrfachverzweigung, je nachdem, welche Funktion aufgerufen werden soll
     $response=null;
+    $params = array(
+        'stg' => FILTER_SANITIZE_STRING,
+        'sem' => FILTER_SANITIZE_ENCODED,
+        'id'=>array('filter' => FILTER_VALIDATE_INT,'flags'  => FILTER_REQUIRE_ARRAY,)
+        );
     switch (filter_input(INPUT_GET, 'f')) {        
         case "MSchedule":
-            $stgnr = filter_input(INPUT_GET, 'stg');
-            $sem = filter_input(INPUT_GET, 'sem');           
-            if (!empty($sem) && !empty($stgnr)) {
-                $response = $client->getMergedSchedule($stgnr, $sem);
+            $getParams = filter_input_array(INPUT_GET, $params);            
+            if (!empty($getParams['stg']) && !empty($getParams['sem'])) {
+                $response = $client->getMergedSchedule($getParams['stg'], $getParams['sem'], $getParams['id']);
             } else {                
                 $response = array();
             }
+            print_r(getJSON($response));
             break;
-        case "Schedule":
-            $stgnr = filter_input(INPUT_GET, 'stg');
-            $sem = filter_input(INPUT_GET, 'sem');           
-            if (!empty($sem) && !empty($stgnr)) {
-                $response = $client->getSchedule($stgnr, $sem);
+        case "Schedule":                
+            $getParams = filter_input_array(INPUT_GET, $params);            
+            if (!empty($getParams['stg']) && !empty($getParams['sem'])) {
+                $response = $client->getSchedule($getParams['stg'], $getParams['sem'], $getParams['id']);
             } else {                
                 $response = array();
             }
+            print_r(getJSON($response));
             break;
             
         case "Courses":
             $response = $client->getCourses();
+            print_r(getJSON($response));
             break;    
         
         case "Changes":
-            $stgnr = filter_input(INPUT_GET, 'stg');            
-            $sem = filter_input(INPUT_GET, 'sem');
-            if (!empty($sem) && !empty($stgnr)) {
-                $response = $client->getChanges($stgnr, $sem);
+            $getParams = filter_input_array(INPUT_GET, $params);            
+            if (!empty($getParams['stg']) && !empty($getParams['sem'])) {             
+                $response = $client->getChanges($getParams['stg'], $getParams['sem'], $getParams['id']);
             } else {
             $response = array();        
             }
+            print_r(getJSON($response));
             break;
                 
         case "Menu":
@@ -60,10 +66,9 @@ try {
             break;   
 
         default:
-            $response = array();
+            include './docs.php';
             break;                
-    }
-    print_r(getJSON($response));
+    }    
 } catch (Exception $e) {
     echo "Caught exception: ", $e->getMessage(), "\n";
 }

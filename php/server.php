@@ -2,7 +2,7 @@
 include './mensa.php';
 include './classes.php';
 
-const __VERSIONNUMBER = 1;
+const __VERSIONNUMBER = 2;
 
 $server = new SoapServer(
         null, array(                    //Parameter	Bedeutung                       Priorität
@@ -76,27 +76,31 @@ function getCourses(){
  * @param type $semester =semester
  * @return type Array über alle Vorlesungen eines Studienganges in einem Semester. Die Einträge sind nach Wochentag und Startzeitpunkt sortiert.
  */
-function getSchedule($stgnr, $semester){
+function getSchedule($stgnr, $semester, $id){
     require 'connect_db.php';
-    $sql = "SELECT "            
-            . "Stundenplan_WWW.Bezeichnung label, "
-            . "IF (Stundenplan_WWW.Anzeigen_int=0 , Stundenplan_WWW.InternetName, '') docent, "
-            . "Stundenplan_WWW.VArt type, "
-            . "Stundenplan_WWW.Gruppe 'group', "
-            . "DATE_FORMAT(Stundenplan_WWW.AnfDatum, '%H:%i') starttime, "
-            . "DATE_FORMAT(Stundenplan_WWW.Enddatum, '%H:%i') endtime, "
-            . "DATE_FORMAT(Stundenplan_WWW.AnfDatum, '%d.%m.%Y') startdate, "
-            . "DATE_FORMAT(Stundenplan_WWW.Enddatum, '%d.%m.%Y') enddate, "
-            . "Stundenplan_WWW.Tag_lang day, "
-            . "Stundenplan_WWW.RaumNr room, "
-            . "Stundenplan_WWW.SplusName splusname "
-            . "FROM Stundenplan_WWW "
-            . " INNER JOIN Studiengaenge "
-            . " ON Studiengaenge.STGNR = Stundenplan_WWW.STGNR "
-            . "WHERE (Studiengaenge.STGNR = :stgnr) "
-            . " AND (Stundenplan_WWW.Fachsemester = :semester) "
-            . "ORDER BY Stundenplan_WWW.Tag_Nr, starttime";
-
+    $param_select = array(
+        "Stundenplan_WWW.id",
+        "Stundenplan_WWW.Bezeichnung label",
+        "IF (Stundenplan_WWW.Anzeigen_int=0 , Stundenplan_WWW.InternetName, '') docent",
+        "Stundenplan_WWW.VArt type",
+        "Stundenplan_WWW.Gruppe 'group'",
+        "DATE_FORMAT(Stundenplan_WWW.AnfDatum, '%H:%i') starttime",
+        "DATE_FORMAT(Stundenplan_WWW.Enddatum, '%H:%i') endtime",
+        "DATE_FORMAT(Stundenplan_WWW.AnfDatum, '%d.%m.%Y') startdate",
+        "DATE_FORMAT(Stundenplan_WWW.Enddatum, '%d.%m.%Y') enddate",
+        "Stundenplan_WWW.Tag_lang day",
+        "Stundenplan_WWW.RaumNr room",
+        "Stundenplan_WWW.SplusName splusname");
+    $param_where = array("(Studiengaenge.STGNR = :stgnr)","(Stundenplan_WWW.Fachsemester = :semester)");
+    $param_orderby=array("Stundenplan_WWW.Tag_Nr", "starttime");
+    
+    if(!empty($id)){
+        array_push($param_where, "Stundenplan_WWW.id IN (".implode(",",$id).")");
+    }
+    $sql = "SELECT ".implode(' , ', $param_select).
+            " FROM Stundenplan_WWW INNER JOIN Studiengaenge ON Studiengaenge.STGNR = Stundenplan_WWW.STGNR "
+            . " WHERE ".implode(' AND ', $param_where).
+            " ORDER BY ".implode(' , ', $param_orderby);
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':stgnr', $stgnr);
     $stmt->bindParam(':semester', $semester);
@@ -108,31 +112,32 @@ function getSchedule($stgnr, $semester){
         }
     }
     $pdo = null;
-
     return addGeneralInfos("schedule", $result);
 }
 
-function getMergedSchedule($stgnr, $semester) {
+function getMergedSchedule($stgnr, $semester, $id) {
     require 'connect_db.php';
-     $sql = "SELECT "
-             . "Stundenplan_WWW.id, "            
-            . "Stundenplan_WWW.Bezeichnung label, "
-            . "IF (Stundenplan_WWW.Anzeigen_int=0 , Stundenplan_WWW.InternetName, '') docent, "
-            . "Stundenplan_WWW.VArt type, "
-            . "Stundenplan_WWW.Gruppe 'group', "
-            . "DATE_FORMAT(Stundenplan_WWW.Beginn, '%H:%i') starttime, "
-            . "DATE_FORMAT(Stundenplan_WWW.Ende, '%H:%i') endtime, "
-            . "DATE_FORMAT(Stundenplan_WWW.Beginn, '%d.%m.%Y') startdate, "
-            . "DATE_FORMAT(Stundenplan_WWW.Ende, '%d.%m.%Y') enddate, "
-            . "Stundenplan_WWW.Tag_lang day, "
-            . "Stundenplan_WWW.RaumNr room "
-            . "FROM Stundenplan_WWW "
-            . " INNER JOIN Studiengaenge "
-            . " ON Studiengaenge.STGNR = Stundenplan_WWW.STGNR "
-            . "WHERE (Studiengaenge.STGNR = :stgnr) "
-            . " AND (Stundenplan_WWW.Fachsemester = :semester) "
-            . "ORDER BY Stundenplan_WWW.Tag_Nr, starttime";
-
+ $param_select = array(
+        "Stundenplan_WWW.id",
+        "Stundenplan_WWW.Bezeichnung label",
+        "IF (Stundenplan_WWW.Anzeigen_int=0 , Stundenplan_WWW.InternetName, '') docent",
+        "Stundenplan_WWW.VArt type",
+        "Stundenplan_WWW.Gruppe 'group'",
+        "DATE_FORMAT(Stundenplan_WWW.AnfDatum, '%H:%i') starttime",
+        "DATE_FORMAT(Stundenplan_WWW.Enddatum, '%H:%i') endtime",
+        "DATE_FORMAT(Stundenplan_WWW.AnfDatum, '%d.%m.%Y') startdate",
+        "DATE_FORMAT(Stundenplan_WWW.Enddatum, '%d.%m.%Y') enddate",
+        "Stundenplan_WWW.Tag_lang day",
+        "Stundenplan_WWW.RaumNr room");
+    $param_where = array("(Studiengaenge.STGNR = :stgnr)","(Stundenplan_WWW.Fachsemester = :semester)");
+    $param_orderby=array("Stundenplan_WWW.Tag_Nr", "starttime");     
+    if(!empty($id)){
+        array_push($param_where, "Stundenplan_WWW.id IN (".implode(",",$id).")");
+    }
+    $sql = "SELECT ".implode(' , ', $param_select).
+            " FROM Stundenplan_WWW INNER JOIN Studiengaenge ON Studiengaenge.STGNR = Stundenplan_WWW.STGNR "
+            . " WHERE ".implode(' AND ', $param_where).
+            " ORDER BY ".implode(' , ', $param_orderby); 
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':stgnr', $stgnr);
     $stmt->bindParam(':semester', $semester);
@@ -144,9 +149,26 @@ function getMergedSchedule($stgnr, $semester) {
         }
     }
     $stmt=null;
+    $param_select=null;
+    $param_where=null;
+    $param_orderby=null;
     
-    $sqlChanges = "SELECT 
-        s.id, 
+    $param_select = array(
+        "s.id",
+        "v.Kommentar",
+        "v.Ausfallgrund",
+        "s.VArt type",
+        "s.Gruppe 'group'",
+        "DATE_FORMAT(v.Ersatzdatum, '%H:%i') ersatzzeit",
+        "DATE_FORMAT(v.Ersatzdatum, '%d.%m.%Y') ersatzdatum",
+        "v.Raum",
+        "v.Ersatztag");
+    $param_where = array("(s.STGNR=:stgnr)","(s.Fachsemester=:semester)","(WEEKOFYEAR(v.Ausfalldatum)=WEEKOFYEAR(NOW()) OR WEEKOFYEAR(v.Ersatzdatum)=WEEKOFYEAR(NOW()))","s.STGNR=v.STGNR");    
+    
+    $sqlChanges = "SELECT ".implode(" , ", $param_select)
+            ." FROM stundenplan_www as s INNER JOIN Verlegungen_WWW as v ON SUBSTRING_INDEX(s.SplusName, '$', '1')=SUBSTRING_INDEX(v.SplusVerlegungsname,'$','1') "
+            . "WHERE ".implode(" AND ", $param_where);
+    /*    "SELECT s.id, 
         v.Kommentar,         
         v.Ausfallgrund, 
         DATE_FORMAT(v.Ersatzdatum, '%H:%i') ersatzzeit, 
@@ -159,7 +181,7 @@ function getMergedSchedule($stgnr, $semester) {
         (s.Fachsemester=:semester) AND
         (WEEKOFYEAR(v.Ausfalldatum)=WEEKOFYEAR(NOW()) OR WEEKOFYEAR(v.Ersatzdatum)=WEEKOFYEAR(NOW()))AND 
         s.STGNR=v.STGNR AND 
-        SUBSTRING_INDEX(s.SplusName, '$',  1)=SUBSTRING_INDEX(v.SplusVerlegungsname,'$','1')";
+        SUBSTRING_INDEX(s.SplusName, '$',  1)=SUBSTRING_INDEX(v.SplusVerlegungsname,'$','1')"; */
     $stmt = $pdo->prepare($sqlChanges);
     $stmt->bindParam(':stgnr', $stgnr);
     $stmt->bindParam(':semester', $semester);
@@ -167,7 +189,7 @@ function getMergedSchedule($stgnr, $semester) {
     $result = array();
     while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
         if(array_key_exists($row['id'], $arrMSchedule)){
-            $arrMSchedule[$row['id']]->setChanges(new MChanges($row['Kommentar'], $row['Ausfallgrund'], $row['ersatzzeit'], $row['ersatzdatum'], $row['Raum'], $row['Ersatztag']));                
+            $arrMSchedule[$row['id']]->setChanges(new MChanges($row['Kommentar'], $row['Ausfallgrund'], $row['ersatzzeit'], $row['ersatzdatum'], $row['Raum'], $row['Ersatztag']));            
         }
     }
     foreach ($arrMSchedule as $mSchedule) {
@@ -175,7 +197,7 @@ function getMergedSchedule($stgnr, $semester) {
     }
     $pdo = null;
 
-    return addGeneralInfos("mschedule", $result);
+    return addGeneralInfos("mschedule", $result);    
 }
 
 /**
@@ -184,14 +206,41 @@ function getMergedSchedule($stgnr, $semester) {
  * @param type $semester =semester
  * @return type Array über alle Änderungen eines Studienganges in einem Semester. Die Einträge sind nach Ausfalltag und Ausfallzeitpunkt sortiert.
  */
-function getChanges($stgnr, $semester) {
+function getChanges($stgnr, $semester, $id) {
     require 'connect_db.php';
-    $sql = "SELECT "
-            . "IF (Verlegungen_WWW.Anzeigen_int=0 , Verlegungen_WWW.InternetName, '') dozent, "
+    
+     $param_select = array(
+         "v.id",
+        "v.Bezeichnung bezeichnung",
+        "IF (v.Anzeigen_int=0, v.InternetName, '') dozent",
+        "v.Tag_lang ausfalltag",
+        "v.Kommentar kommentar",
+        "v.Gruppe gruppe",
+        "DATE_FORMAT(v.Ausfalldatum, '%H:%i') ausfallzeit",
+        "DATE_FORMAT(v.Ausfalldatum, '%d.%m.%Y') ausfalldatum",
+        "v.RaumNr ausfallraum",
+        "v.Ausfallgrund ausfallgrund",
+        "DATE_FORMAT(v.Ersatzdatum, '%H:%i') ersatzzeit",
+        "DATE_FORMAT(v.Ersatzdatum, '%d.%m.%Y') ersatzdatum",
+         "v.Raum ersatzraum",
+         "v.Ersatztag ersatztag",
+         "v.SplusVerlegungsname splusname");
+    $param_where = array("(v.STGNR = :stgnr)","(v.Fachsemester = :semester)","(DATE(v.Ausfalldatum)>=NOW() OR DATE(v.Ersatzdatum)>=NOW())");
+    $param_orderby=array("ausfalldatum", "ausfallzeit");
+    if(!empty($id)){
+        array_push($param_where, "s.id IN (".implode(",",$id).")");
+    }
+    
+    $sql = "SELECT ".implode(", ", $param_select)
+            ." FROM stundenplan_www as s INNER JOIN Verlegungen_WWW as v ON SUBSTRING_INDEX(s.SplusName, '$', '1')=SUBSTRING_INDEX(v.SplusVerlegungsname,'$','1')"
+            . " WHERE ".implode(" AND ", $param_where)
+            ." ORDER BY ".implode(", ",$param_orderby);
+/*    $sql1 = "SELECT "
+            . "IF (Verlegungen_WWW.Anzeigen_int=0, Verlegungen_WWW.InternetName, '') dozent, "
             . "Verlegungen_WWW.Bezeichnung bezeichnung, "
             . "Verlegungen_WWW.Tag_lang ausfalltag, "
             . "Verlegungen_WWW.Kommentar kommentar, "
-            . "Verlegungen_WWW.Gruppe gruppe,"
+            . "Verlegungen_WWW.Gruppe gruppe, "
             . "DATE_FORMAT(Verlegungen_WWW.Ausfalldatum, '%H:%i') ausfallzeit, "
             . "DATE_FORMAT(Verlegungen_WWW.Ausfalldatum, '%d.%m.%Y') ausfalldatum, "
             . "Verlegungen_WWW.RaumNr ausfallraum, "
@@ -202,12 +251,12 @@ function getChanges($stgnr, $semester) {
             . "Verlegungen_WWW.Ersatztag ersatztag, "
             . "Verlegungen_WWW.SplusVerlegungsname splusname "
             . "FROM Verlegungen_WWW "
-            . " INNER JOIN Studiengaenge "
-            . " ON Studiengaenge.STGNR = Verlegungen_WWW.STGNR "
+            . "INNER JOIN Studiengaenge "
+            . "ON Studiengaenge.STGNR = Verlegungen_WWW.STGNR "
             . "WHERE (Studiengaenge.STGNR = :stgnr) "
-            . " AND (Verlegungen_WWW.Fachsemester = :semester) "
-            . " AND (DATE(Verlegungen_WWW.Ausfalldatum)>=NOW() OR DATE(Verlegungen_WWW.Ersatzdatum)>=NOW()) "
-            . "ORDER BY ausfalldatum, ausfallzeit";
+            . "AND (Verlegungen_WWW.Fachsemester = :semester) "
+            . "AND (DATE(Verlegungen_WWW.Ausfalldatum)>=NOW() OR DATE(Verlegungen_WWW.Ersatzdatum)>=NOW()) "
+            . "ORDER BY ausfalldatum, ausfallzeit"; */
 
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':stgnr', $stgnr);
@@ -217,6 +266,7 @@ function getChanges($stgnr, $semester) {
     while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
         if($row['ausfallzeit']!= null){
         $result[] = array(
+            "id"=>$row['id'],
             "label"=>$row['bezeichnung'], 
             "docent" => $row['dozent'],             
             "comment"=>$row['kommentar'], 
