@@ -9,8 +9,7 @@
 <link rel="stylesheet" type="text/css" href="./css/fontello.css" media="screen">
 <link rel="stylesheet" type="text/css" href="./css/theme-base.css" media="screen">
 <link rel="stylesheet" type="text/css" href="./css/theme-medium.css" media="screen">
-
-<style type="text/css"></style></head>
+</head>
 <body class="docs ">
 
 <nav id="head-nav" class="navbar navbar-fixed-top">
@@ -52,7 +51,7 @@
       <dd>
           <p class="para">
               Die Werte <strong><code>Schedule</code></strong>, <strong><code>Changes</code></strong> oder <strong><code>MSchedule</code></strong> erfordern die oben genannten Parameter und können über den <strong>optional</strong> ergänzt werden.<br>
-            Der Wert <strong><code>Courses</code></strong> erfordert <strong>keinen</strong> weiteren Parameter!
+            Der Wert <strong><code>Courses</code></strong> erfordert <strong>keine</strong> weiteren Parameter!
           </p>
       </dd>
       <dt><code class="parameter">course</code></dt>

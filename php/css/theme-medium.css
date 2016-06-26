@@ -13,7 +13,7 @@
 
 
 html {
-  background: #333 url('/images/bg-texture-00.svg');
+  background: #333;
   color: #CCC;
 }
 #layout-content {

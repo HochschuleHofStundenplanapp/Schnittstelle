@@ -1,5 +1,5 @@
 <?php
-include './mensa.php';
+//include './mensa.php';        //Mensa deaktiviert!
 include './classes.php';
 
 const __VERSIONNUMBER = 2;
@@ -23,9 +23,13 @@ function addGeneralInfos($nameOfContent, $arrContent){
  * 
  * @return type Speiesplan, der aus der XML-Datei erzeugt wird.
  */
+/*
+ * Mensa deaktiviert!
 function getMenu(){
     return addGeneralInfos("menu", readMenuXML());
 }
+ * 
+ */
 
 /** 
  * @return type Array aller Studiengänge

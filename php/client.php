@@ -61,9 +61,13 @@ try {
             print_r(getJSON($response));
             break;
                 
+/*
+ *  Mensa deaktiviert!
         case "Menu":
             $response = $client->getMenu();
             break;   
+ * 
+ */
 
         default:
             include './docs.php';
