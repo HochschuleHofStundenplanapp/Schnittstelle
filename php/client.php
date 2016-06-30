@@ -24,40 +24,30 @@ try {
     $params = array(
         'stg' => FILTER_SANITIZE_STRING,
         'sem' => FILTER_SANITIZE_ENCODED,
+        'tt' => FILTER_SANITIZE_STRING,
         'id'=>array('filter' => FILTER_VALIDATE_INT,'flags'  => FILTER_REQUIRE_ARRAY,)
         );
     switch (filter_input(INPUT_GET, 'f')) {        
         case "MSchedule":
             $getParams = filter_input_array(INPUT_GET, $params);            
-            if (!empty($getParams['stg']) && !empty($getParams['sem'])) {
-                $response = $client->getMergedSchedule($getParams['stg'], $getParams['sem'], $getParams['id']);
-            } else {                
-                $response = array();
-            }
+            $response = $client->getMergedSchedule($getParams['stg'], $getParams['sem'], $getParams['tt'], $getParams['id']);
             print_r(getJSON($response));
             break;
         case "Schedule":                
-            $getParams = filter_input_array(INPUT_GET, $params);            
-            if (!empty($getParams['stg']) && !empty($getParams['sem'])) {
-                $response = $client->getSchedule($getParams['stg'], $getParams['sem'], $getParams['id']);
-            } else {                
-                $response = array();
-            }
+            $getParams = filter_input_array(INPUT_GET, $params);            //           
+            $response = $client->getSchedule($getParams['stg'], $getParams['sem'], $getParams['tt'], $getParams['id']);
             print_r(getJSON($response));
             break;
             
         case "Courses":
-            $response = $client->getCourses();
+            $getParams = filter_input_array(INPUT_GET, array('tt' => FILTER_SANITIZE_STRING));            
+            $response = $client->getCourses($getParams['tt']);
             print_r(getJSON($response));
             break;    
         
         case "Changes":
-            $getParams = filter_input_array(INPUT_GET, $params);            
-            if (!empty($getParams['stg']) && !empty($getParams['sem'])) {             
-                $response = $client->getChanges($getParams['stg'], $getParams['sem'], $getParams['id']);
-            } else {
-            $response = array();        
-            }
+            $getParams = filter_input_array(INPUT_GET, $params);                      
+            $response = $client->getChanges($getParams['stg'], $getParams['sem'], $getParams['tt'], $getParams['id']);
             print_r(getJSON($response));
             break;
                 

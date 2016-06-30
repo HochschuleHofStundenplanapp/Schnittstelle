@@ -2,7 +2,7 @@
 //include './mensa.php';        //Mensa deaktiviert!
 include './classes.php';
 
-const __VERSIONNUMBER = 2;
+const __VERSIONNUMBER = 3;
 
 $server = new SoapServer(
         null, array(                    //Parameter	Bedeutung                       Priorität
@@ -34,34 +34,32 @@ function getMenu(){
 /** 
  * @return type Array aller Studiengänge
  */
-function getCourses(){
+function getCourses($tt){
     require 'connect_db.php';
-    $ws_ss="";
-    $year=  date('Y');
-    $month = date('n');
-    if(3 < $month && $month < 9){  //Sommersemester        
-        $ws_ss="SS";
-    }else{                         //Wintersemester        
-        $ws_ss="WS";        
-        if($month < 4){
-            $year = $year-1;       //Wenn Wintersemester und neues Jahr hat begonnen nimm altes Jahr.
-        }
-    }    
-    $sql = "SELECT DISTINCT sg.Bezeichnung, sg.Bezeichnung_en, sg.STGNR, sp.Fachsemester
-        FROM Studiengaenge AS sg, Stundenplan_WWW AS sp
-        WHERE sg.STGNR=sp.STGNR AND sp.WS_SS=:ws_ss AND sp.Jahr=:year                 
-        ORDER BY sg.Bezeichnung";
+    
+    $param_select = array(
+        "sg.Bezeichnung",
+        "sg.Bezeichnung_en",
+        "sg.STGNR",
+        "sp.Fachsemester",
+        "sp.Jahr");
+    $param_where = array("(sp.WS_SS=:tt)");
+    $param_orderby=array("sg.Bezeichnung");
+    
+    $sql = "SELECT DISTINCT ".implode(' , ', $param_select).
+            " FROM Stundenplan_WWW AS sp INNER JOIN Studiengaenge  AS sg ON sg.STGNR = sp.STGNR "
+            . " WHERE ".implode(' AND ', $param_where).
+            " ORDER BY ".implode(' , ', $param_orderby);
 
     $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':ws_ss', $ws_ss);
-    $stmt->bindParam(':year', $year);
+    $stmt->bindParam(':tt', $tt);
     $stmt->execute();
     
     $result = array();
     $arrSemester = array();
     while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {      
         if(!array_key_exists($row['STGNR'], $arrSemester)){
-            $result[]=new Course($row["STGNR"], $row["Bezeichnung"], $row["Bezeichnung_en"]);
+            $result[]=new Course($row["STGNR"], $row["Jahr"],$row["Bezeichnung"], $row["Bezeichnung_en"]);
         }
         $arrSemester[$row['STGNR']][]=$row["Fachsemester"];
     }
@@ -80,7 +78,9 @@ function getCourses(){
  * @param type $semester =semester
  * @return type Array über alle Vorlesungen eines Studienganges in einem Semester. Die Einträge sind nach Wochentag und Startzeitpunkt sortiert.
  */
-function getSchedule($stgnr, $semester, $id){
+function getSchedule($stgnr, $semester, $tt, $id){
+    $result = array();
+    if(!empty($stgnr) && !empty($semester) && !empty($tt)){
     require 'connect_db.php';
     $param_select = array(
         "Stundenplan_WWW.id",
@@ -95,7 +95,7 @@ function getSchedule($stgnr, $semester, $id){
         "Stundenplan_WWW.Tag_lang day",
         "Stundenplan_WWW.RaumNr room",
         "Stundenplan_WWW.SplusName splusname");
-    $param_where = array("(Studiengaenge.STGNR = :stgnr)","(Stundenplan_WWW.Fachsemester = :semester)");
+    $param_where = array("(Studiengaenge.STGNR = :stgnr)","(Stundenplan_WWW.Fachsemester = :semester)", "(Stundenplan_WWW.WS_SS = :tt)");
     $param_orderby=array("Stundenplan_WWW.Tag_Nr", "starttime");
     
     if(!empty($id)){
@@ -108,18 +108,21 @@ function getSchedule($stgnr, $semester, $id){
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':stgnr', $stgnr);
     $stmt->bindParam(':semester', $semester);
+    $stmt->bindParam(':tt', $tt);    
     $stmt->execute();
-    $result = array();
     while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
         if($row['starttime']!= null && $row['endtime']!=null){
             $result[] = $row;
         }
     }
     $pdo = null;
+    }
     return addGeneralInfos("schedule", $result);
 }
 
-function getMergedSchedule($stgnr, $semester, $id) {
+function getMergedSchedule($stgnr, $semester, $tt, $id) {
+    $result = array();
+    if(!empty($stgnr) && !empty($semester) && !empty($tt)){
     require 'connect_db.php';
  $param_select = array(
         "Stundenplan_WWW.id",
@@ -133,7 +136,7 @@ function getMergedSchedule($stgnr, $semester, $id) {
         "DATE_FORMAT(Stundenplan_WWW.Enddatum, '%d.%m.%Y') enddate",
         "Stundenplan_WWW.Tag_lang day",
         "Stundenplan_WWW.RaumNr room");
-    $param_where = array("(Studiengaenge.STGNR = :stgnr)","(Stundenplan_WWW.Fachsemester = :semester)");
+    $param_where = array("(Studiengaenge.STGNR = :stgnr)","(Stundenplan_WWW.Fachsemester = :semester)", "(Stundenplan_WWW.WS_SS = :tt)");
     $param_orderby=array("Stundenplan_WWW.Tag_Nr", "starttime");     
     if(!empty($id)){
         array_push($param_where, "Stundenplan_WWW.id IN (".implode(",",$id).")");
@@ -145,6 +148,7 @@ function getMergedSchedule($stgnr, $semester, $id) {
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':stgnr', $stgnr);
     $stmt->bindParam(':semester', $semester);
+    $stmt->bindParam(':tt', $tt);
     $stmt->execute();
     $arrMSchedule = array();
     while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
@@ -200,7 +204,7 @@ function getMergedSchedule($stgnr, $semester, $id) {
         $result[] = $mSchedule;
     }
     $pdo = null;
-
+    }
     return addGeneralInfos("mschedule", $result);    
 }
 
@@ -210,7 +214,9 @@ function getMergedSchedule($stgnr, $semester, $id) {
  * @param type $semester =semester
  * @return type Array über alle Änderungen eines Studienganges in einem Semester. Die Einträge sind nach Ausfalltag und Ausfallzeitpunkt sortiert.
  */
-function getChanges($stgnr, $semester, $id) {
+function getChanges($stgnr, $semester, $tt, $id) {
+    $result = array();
+    if(!empty($stgnr) && !empty($semester) && !empty($tt)){
     require 'connect_db.php';
     
      $param_select = array(
@@ -229,7 +235,7 @@ function getChanges($stgnr, $semester, $id) {
          "v.Raum ersatzraum",
          "v.Ersatztag ersatztag",
          "v.SplusVerlegungsname splusname");
-    $param_where = array("(v.STGNR = :stgnr)","(v.Fachsemester = :semester)","(DATE(v.Ausfalldatum)>=NOW() OR DATE(v.Ersatzdatum)>=NOW())");
+    $param_where = array("(v.STGNR = :stgnr)","(v.Fachsemester = :semester)","(DATE(v.Ausfalldatum)>=NOW() OR DATE(v.Ersatzdatum)>=NOW())", "(s.WS_SS = :tt)");
     $param_orderby=array("ausfalldatum", "ausfallzeit");
     if(!empty($id)){
         array_push($param_where, "s.id IN (".implode(",",$id).")");
@@ -265,8 +271,8 @@ function getChanges($stgnr, $semester, $id) {
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':stgnr', $stgnr);
     $stmt->bindParam(':semester', $semester);
-    $stmt->execute();
-    $result = array();
+    $stmt->bindParam(':tt', $tt);
+    $stmt->execute();    
     while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
         if($row['ausfallzeit']!= null){
         $result[] = array(
@@ -292,6 +298,7 @@ function getChanges($stgnr, $semester, $id) {
     }
     // Datenbankverbindung schließen
     $pdo = null;
+    }
     return addGeneralInfos("changes", $result);
 }
 

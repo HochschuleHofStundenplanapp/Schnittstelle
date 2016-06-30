@@ -2,11 +2,13 @@
 class Course {
 
     var $course;
+    var $year;
     var $labels;
     var $semester;
     
-    function __construct($course, $de, $en) {
+    function __construct($course, $year ,$de, $en) {
         $this->course=$course;
+        $this->year=$year;
         if(trim($en)==false){
             $en = $de;
         }

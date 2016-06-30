@@ -23,7 +23,7 @@
   <div id="flash-message"></div>
 
 </nav>
-<div class="headsup">Version 1</div>
+<div class="headsup">Version 3</div>
 
 
 <div id="layout" class="clearfix">
@@ -33,15 +33,16 @@
   <h1 class="refname">Studiengänge</h1>
   <p class="refpurpose"><span class="refname">Version 1</span> — <span class="dc-title">Basisfunktionen (Studiengänge, Stundenplan, Änderungen, Stundenplan mit integrierten Änderungen) hinzugefügt.</span></p>
   <p class="refpurpose"><span class="refname">Version 2</span> — <span class="dc-title">Neuer Übergabeparameter <strong>id</strong> wurde hinzugefügt.</span></p>
+  <p class="refpurpose"><span class="refname">Version 3</span> — <span class="dc-title">Neuer Übergabeparameter <strong>tt</strong> wurde hinzugefügt.</span></p>
  </div>
 
  <div class="refsect1 description">
   <h3 class="title">Beschreibung</h3>
   <div class="methodsynopsis dc-description">
-   <span class="type">JsonObject</span> <span class="methodname"><strong>client.php?f=</strong></span>(<span class="type">String</span> <span class="methodname"><strong>function</strong></span>)&stg=(<span class="type">String</span> <span class="methodname"><strong>course</strong></span>)&sem=(<span class="type">String</span> <span class="methodname"><strong>semester</strong></span>)&id[]=(<span class="type">array</span> <span class="methodname"><strong>id</strong></span> (optional, multiple))
+   <span class="type">JsonObject</span> <span class="methodname"><strong>client.php?f=</strong></span>(<span class="type">String</span> <span class="methodname"><strong>function</strong></span>)&stg=(<span class="type">String</span> <span class="methodname"><strong>course</strong></span>)&sem=(<span class="type">String</span> <span class="methodname"><strong>semester</strong></span>)&tt=(<span class="type">String</span> <span class="methodname"><strong>tt</strong></span>)&id[]=(<span class="type">array</span> <span class="methodname"><strong>id</strong></span> (optional, multiple))
   </div>
 
-  <p class="para rdfs-comment">Liefert alle Studiengänge des aktuellen Jahres und Semesters (WS/SS) alphabetisch sortiert.</p><div class="example-contents">
+  <p class="para rdfs-comment">Liefert alle Studiengänge des aktuellen Jahres und Semesterhalbjahres (WS/SS) alphabetisch sortiert.</p><div class="example-contents">
  </div>
 
  <div class="parameters">
@@ -50,8 +51,8 @@
       <dt><code class="parameter">function</code></dt>
       <dd>
           <p class="para">
-              Die Werte <strong><code>Schedule</code></strong>, <strong><code>Changes</code></strong> oder <strong><code>MSchedule</code></strong> erfordern die oben genannten Parameter und können über den <strong>optional</strong> ergänzt werden.<br>
-            Der Wert <strong><code>Courses</code></strong> erfordert <strong>keine</strong> weiteren Parameter!
+            Die Werte <strong><code>Schedule</code></strong>, <strong><code>Changes</code></strong> oder <strong><code>MSchedule</code></strong> erfordern die oben genannten Parameter und können über den <strong>optional</strong> ergänzt werden.<br>
+            Der Wert <strong><code>Courses</code></strong> erfordert <strong>ausschließlich</strong> den Paramter (<span class="methodname"><strong>tt</strong>)!
           </p>
       </dd>
       <dt><code class="parameter">course</code></dt>
@@ -66,6 +67,12 @@
             Das Semesterjahr des Studienganges
           </p>
       </dd>
+      <dt><code class="parameter">tt</code></dt>
+      <dd>
+          <p class="para">
+            Das Semesterhalbjahr (SS/WS)
+          </p>
+      </dd>      
       <dt><code class="parameter">id</code></dt>
       <dd>
           <p class="para">
@@ -87,6 +94,7 @@
     "courses": [
         {
             "course": String Studiengangkürzel,
+            "year": String Jahr,
             "labels": {
                 "de": String deutscher Studiengangbezeichner,
                 "en": String englischer Studiengangbezeichner
@@ -201,9 +209,11 @@
      <div class="example">
         <p><strong>#1 <span class="function"><strong>Courses</strong></span></strong></p>
          <div class="example-contents">
-            <div class="phpcode"><code><span style="color: #000000">
-                client.php?f=<span style="color: #DD0000">Courses
-            </span></code></div>
+            <div class="phpcode">
+                <code>
+                    <span style="color: #000000">client.php?f=<span style="color: #DD0000">Courses</span>&tt=<span style="color: #DD0000">SS</span>
+                </code>
+            </div>
          </div>
          <div class="example-contents"><p>Das oben gezeigte Beispiel erzeugt folgende
                  Ausgabe:</p></div>
@@ -214,6 +224,7 @@
     "courses": [
         {
             "course": "BBB",
+            "year": "2016",
             "labels": {
                 "de": "Berufsbegleitender Bachelor Betriebswirtschaft",
                 "en": "Business Administration (part-time)"
@@ -235,7 +246,7 @@
          <p><strong>#2 <span class="function"><strong>Schedule</strong></span></strong></p>
          <div class="example-contents">
             <div class="phpcode"><code><span style="color: #000000">
-                client.php?f=<span style="color: #DD0000">Schedule</span>&stg=<span style="color: #DD0000">Inf</span>&sem=<span style="color: #DD0000">6</span>
+                client.php?f=<span style="color: #DD0000">Schedule</span>&stg=<span style="color: #DD0000">Inf</span>&sem=<span style="color: #DD0000">6</span>&tt=<span style="color: #DD0000">SS</span>
             </span></code></div>
          </div>
          <div class="example-contents"><p>Das oben gezeigte Beispiel erzeugt folgende
@@ -268,7 +279,7 @@
          <p><strong>#3 <span class="function"><strong>Changes</strong></span></strong></p>
          <div class="example-contents">
             <div class="phpcode"><code><span style="color: #000000">
-                client.php?f=<span style="color: #DD0000">Changes</span>&stg=<span style="color: #DD0000">Inf</span>&sem=<span style="color: #DD0000">6</span>
+                client.php?f=<span style="color: #DD0000">Changes</span>&stg=<span style="color: #DD0000">Inf</span>&sem=<span style="color: #DD0000">6</span>&tt=<span style="color: #DD0000">SS</span>
             </span></code></div>
          </div>
          <div class="example-contents"><p>Das oben gezeigte Beispiel erzeugt folgende
@@ -307,7 +318,7 @@
          <p><strong>#4 <span class="function"><strong>MSchedule</strong></span></strong></p>
          <div class="example-contents">
             <div class="phpcode"><code><span style="color: #000000">
-                client.php?f=<span style="color: #DD0000">MSchedule</span>&stg=<span style="color: #DD0000">md</span>&sem=<span style="color: #DD0000">4</span>
+                client.php?f=<span style="color: #DD0000">MSchedule</span>&stg=<span style="color: #DD0000">md</span>&sem=<span style="color: #DD0000">4</span>&tt=<span style="color: #DD0000">SS</span>
             </span></code></div>
          </div>
          <div class="example-contents"><p>Das oben gezeigte Beispiel erzeugt folgende
