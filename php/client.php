@@ -25,7 +25,7 @@ try {
         'stg' => FILTER_SANITIZE_STRING,
         'sem' => FILTER_SANITIZE_ENCODED,
         'tt' => FILTER_SANITIZE_STRING,
-        'id'=>array('filter' => FILTER_VALIDATE_INT,'flags'  => FILTER_REQUIRE_ARRAY,)
+        'id'=>array('filter' => FILTER_VALIDATE_INT,'flags'  => FILTER_REQUIRE_ARRAY)
         );
     switch (filter_input(INPUT_GET, 'f')) {        
         case "MSchedule":
@@ -36,6 +36,12 @@ try {
         case "Schedule":                
             $getParams = filter_input_array(INPUT_GET, $params);            //           
             $response = $client->getSchedule($getParams['stg'], $getParams['sem'], $getParams['tt'], $getParams['id']);
+            print_r(getJSON($response));
+            break;
+        
+        case "MySchedule":                
+            $getParams = filter_input_array(INPUT_GET, array('id'=>array('filter' => FILTER_VALIDATE_INT,'flags'  => FILTER_REQUIRE_ARRAY,)));         
+            $response = $client->getMySchedule($getParams['id']);
             print_r(getJSON($response));
             break;
             

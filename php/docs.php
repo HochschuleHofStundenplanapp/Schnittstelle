@@ -23,7 +23,7 @@
   <div id="flash-message"></div>
 
 </nav>
-<div class="headsup">Version 3</div>
+<div class="headsup">Version 3.1</div>
 
 
 <div id="layout" class="clearfix">
@@ -34,12 +34,13 @@
   <p class="refpurpose"><span class="refname">Version 1</span> — <span class="dc-title">Basisfunktionen (Studiengänge, Stundenplan, Änderungen, Stundenplan mit integrierten Änderungen) hinzugefügt.</span></p>
   <p class="refpurpose"><span class="refname">Version 2</span> — <span class="dc-title">Neuer Übergabeparameter <strong>id</strong> wurde hinzugefügt.</span></p>
   <p class="refpurpose"><span class="refname">Version 3</span> — <span class="dc-title">Neuer Übergabeparameter <strong>tt</strong> wurde hinzugefügt.</span></p>
+  <p class="refpurpose"><span class="refname">Version 3.1</span> — <span class="dc-title">Neue Funktion MySchedule verfügbar.</span></p>
  </div>
 
  <div class="refsect1 description">
   <h3 class="title">Beschreibung</h3>
   <div class="methodsynopsis dc-description">
-   <span class="type">JsonObject</span> <span class="methodname"><strong>client.php?f=</strong></span>(<span class="type">String</span> <span class="methodname"><strong>function</strong></span>)&stg=(<span class="type">String</span> <span class="methodname"><strong>course</strong></span>)&sem=(<span class="type">String</span> <span class="methodname"><strong>semester</strong></span>)&tt=(<span class="type">String</span> <span class="methodname"><strong>tt</strong></span>)&id[]=(<span class="type">array</span> <span class="methodname"><strong>id</strong></span> (optional, multiple))
+   <span class="type">JsonObject</span> <span class="methodname"><strong>client.php?f=</strong></span>(<span class="type">String</span> <span class="methodname"><strong>function</strong></span>)&stg=(<span class="type">String</span> <span class="methodname"><strong>course</strong></span>)&sem=(<span class="type">String</span> <span class="methodname"><strong>semester</strong></span>)&tt=(<span class="type">String</span> <span class="methodname"><strong>tt</strong></span>)&id[]=(<span class="type">array</span> <span class="methodname"><strong>id</strong></span> (multiple))
   </div>
 
   <p class="para rdfs-comment">Liefert alle Studiengänge des aktuellen Jahres und Semesterhalbjahres (WS/SS) alphabetisch sortiert.</p><div class="example-contents">
@@ -51,8 +52,9 @@
       <dt><code class="parameter">function</code></dt>
       <dd>
           <p class="para">
-            Die Werte <strong><code>Schedule</code></strong>, <strong><code>Changes</code></strong> oder <strong><code>MSchedule</code></strong> erfordern die oben genannten Parameter und können über den <strong>optional</strong> ergänzt werden.<br>
-            Der Wert <strong><code>Courses</code></strong> erfordert <strong>ausschließlich</strong> den Paramter (<span class="methodname"><strong>tt</strong>)!
+            Die Funktionen <strong><code>Schedule</code></strong>, <strong><code>Changes</code></strong> oder <strong><code>MSchedule</code></strong> erfordern die Parameter <span class="methodname">(<strong>stg, sem, tt, id (optional)</strong>)</span> und können über den <strong>optional</strong> ergänzt werden.<br>
+                Die Funktion <strong><code>MySchedule</code></strong> erfordert <strong>ausschließlich</strong> den Parameter (<span class="methodname"><strong>id</strong></span>).<br/>
+            Die Funktion <strong><code>Courses</code></strong> erfordert <strong>ausschließlich</strong> den Parameter (<span class="methodname"><strong>tt</strong></span>).
           </p>
       </dd>
       <dt><code class="parameter">course</code></dt>
@@ -76,7 +78,14 @@
       <dt><code class="parameter">id</code></dt>
       <dd>
           <p class="para">
-              Es werden nur noch die Datensätze angezeigt, dessen <strong><code>id</code></strong> im Array enthalten ist. Die Werte von <strong><code>id</code></strong> sind gleich der Datenbanktabelle <strong><code>Stundenplan_WWW.id</code></strong>
+              Es werden nur noch die Datensätze angezeigt, dessen <strong><code>id</code></strong> im Array enthalten ist. Die Werte von <strong><code>id</code></strong> sind gleich der Datenbanktabelle <strong><code>Stundenplan_WWW.id</code></strong><br/>
+              Mehrere ID's im URL: 
+               <div class="example-contents">
+            <div class="phpcode">
+                <code>
+              client.php?f=<span style="color: #DD0000">function</span>&id[]=<span style="color: #DD0000">int</span>&id[]=<span style="color: #DD0000">int</span>&id[]=<span style="color: #DD0000">int</span>
+                </code></div></div>
+                
           </p>
       </dd>
    </dl>
@@ -115,6 +124,32 @@
 {
     "version": Aktuelle Schnittstellenversion,
     "schedule": [
+        {
+            "id": String Tabellen-ID,
+            "label": String Vorlesungsbezeichner,
+            "docent": String Dozentenname,
+            "type": String Art der Vorlesung,
+            "group": String Gruppe,
+            "starttime": String Startzeitpunt der Vorlesung (HH:mm),
+            "endtime": String Endzeitpunt der Vorlesung (HH:mm),
+            "startdate": String Datum der ersten Vorlesung (dd.mm.yyyy),
+            "enddate": String Datum der letzten Vorlesung (dd.mm.yyyy),
+            "day": String Wochentag,
+            "room": String Raum,
+            "splusname": String SplusName
+        },
+        {
+            ...
+        }
+    ]
+}</pre></div>
+    </div>
+    <p><strong>#2.1 <span class="function"><strong>MySchedule</strong></span></strong></p>
+    <div class="example-contents screen">
+        <div class="cdata"><pre>
+{
+    "version": Aktuelle Schnittstellenversion,
+    "myschedule": [
         {
             "id": String Tabellen-ID,
             "label": String Vorlesungsbezeichner,
@@ -200,6 +235,7 @@
     ]
 }</pre></div>
     </div>
+    
   </p>
  </div>
 
@@ -218,7 +254,7 @@
          <div class="example-contents"><p>Das oben gezeigte Beispiel erzeugt folgende
                  Ausgabe:</p></div>
          <div class="example-contents screen">
-             <div class="cdata"><pre>Array
+             <div class="cdata"><pre>
 {
     "version": Aktuelle Schnittstellenversion,
     "courses": [
@@ -240,19 +276,22 @@
             ...
         }
     ]
-                 </pre></div>
+}</pre></div>
          </div>
         
-         <p><strong>#2 <span class="function"><strong>Schedule</strong></span></strong></p>
+         <p><strong>#2 <span class="function"><strong>Schedule/MySchedule</strong></span></strong></p>
          <div class="example-contents">
             <div class="phpcode"><code><span style="color: #000000">
                 client.php?f=<span style="color: #DD0000">Schedule</span>&stg=<span style="color: #DD0000">Inf</span>&sem=<span style="color: #DD0000">6</span>&tt=<span style="color: #DD0000">SS</span>
+            </span></code></div>
+             <div class="phpcode"><code><span style="color: #000000">
+                client.php?f=<span style="color: #DD0000">MySchedule</span>&id[]=<span style="color: #DD0000">1332256</span>
             </span></code></div>
          </div>
          <div class="example-contents"><p>Das oben gezeigte Beispiel erzeugt folgende
                  Ausgabe:</p></div>
          <div class="example-contents screen">
-             <div class="cdata"><pre>Array
+             <div class="cdata"><pre>
 {
     "version": Aktuelle Schnittstellenversion,
     "schedule": [
@@ -274,7 +313,7 @@
             ...
         }
     ]
-                 </pre></div>
+}</pre></div>
          </div>
          <p><strong>#3 <span class="function"><strong>Changes</strong></span></strong></p>
          <div class="example-contents">
@@ -285,7 +324,7 @@
          <div class="example-contents"><p>Das oben gezeigte Beispiel erzeugt folgende
                  Ausgabe:</p></div>
          <div class="example-contents screen">
-             <div class="cdata"><pre>Array
+             <div class="cdata"><pre>
 {
     "version": Aktuelle Schnittstellenversion,
     "changes": [
@@ -313,7 +352,8 @@
         {
             ...
         }
-    ]</pre></div>
+    ]
+}</pre></div>
          </div>
          <p><strong>#4 <span class="function"><strong>MSchedule</strong></span></strong></p>
          <div class="example-contents">
