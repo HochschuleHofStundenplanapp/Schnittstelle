@@ -176,20 +176,6 @@ function getMergedSchedule($stgnr, $semester, $tt, $id) {
     $sqlChanges = "SELECT ".implode(" , ", $param_select)
             ." FROM stundenplan_www as s INNER JOIN Verlegungen_WWW as v ON SUBSTRING_INDEX(s.SplusName, '$', '1')=SUBSTRING_INDEX(v.SplusVerlegungsname,'$','1') "
             . "WHERE ".implode(" AND ", $param_where);
-    /*    "SELECT s.id, 
-        v.Kommentar,         
-        v.Ausfallgrund, 
-        DATE_FORMAT(v.Ersatzdatum, '%H:%i') ersatzzeit, 
-        DATE_FORMAT(v.Ersatzdatum, '%d.%m.%Y') ersatzdatum, 
-        v.Raum,
-        v.Ersatztag
-        FROM stundenplan_www as s, verlegungen_www as v 
-        WHERE 
-        (s.STGNR=:stgnr) AND 
-        (s.Fachsemester=:semester) AND
-        (WEEKOFYEAR(v.Ausfalldatum)=WEEKOFYEAR(NOW()) OR WEEKOFYEAR(v.Ersatzdatum)=WEEKOFYEAR(NOW()))AND 
-        s.STGNR=v.STGNR AND 
-        SUBSTRING_INDEX(s.SplusName, '$',  1)=SUBSTRING_INDEX(v.SplusVerlegungsname,'$','1')"; */
     $stmt = $pdo->prepare($sqlChanges);
     $stmt->bindParam(':stgnr', $stgnr);
     $stmt->bindParam(':semester', $semester);
@@ -242,32 +228,9 @@ function getChanges($stgnr, $semester, $tt, $id) {
     }
     
     $sql = "SELECT ".implode(", ", $param_select)
-            ." FROM stundenplan_www as s INNER JOIN Verlegungen_WWW as v ON SUBSTRING_INDEX(s.SplusName, '$', '1')=SUBSTRING_INDEX(v.SplusVerlegungsname,'$','1')"
+            ." FROM Stundenplan_WWW as s INNER JOIN Verlegungen_WWW as v ON SUBSTRING_INDEX(s.SplusName, '$', '1')=SUBSTRING_INDEX(v.SplusVerlegungsname,'$','1')"
             . " WHERE ".implode(" AND ", $param_where)
             ." ORDER BY ".implode(", ",$param_orderby);
-/*    $sql1 = "SELECT "
-            . "IF (Verlegungen_WWW.Anzeigen_int=0, Verlegungen_WWW.InternetName, '') dozent, "
-            . "Verlegungen_WWW.Bezeichnung bezeichnung, "
-            . "Verlegungen_WWW.Tag_lang ausfalltag, "
-            . "Verlegungen_WWW.Kommentar kommentar, "
-            . "Verlegungen_WWW.Gruppe gruppe, "
-            . "DATE_FORMAT(Verlegungen_WWW.Ausfalldatum, '%H:%i') ausfallzeit, "
-            . "DATE_FORMAT(Verlegungen_WWW.Ausfalldatum, '%d.%m.%Y') ausfalldatum, "
-            . "Verlegungen_WWW.RaumNr ausfallraum, "
-            . "Verlegungen_WWW.Ausfallgrund ausfallgrund, "
-            . "DATE_FORMAT(Verlegungen_WWW.Ersatzdatum, '%H:%i') ersatzzeit, "
-            . "DATE_FORMAT(Verlegungen_WWW.Ersatzdatum, '%d.%m.%Y') ersatzdatum, "
-            . "Verlegungen_WWW.Raum ersatzraum, "
-            . "Verlegungen_WWW.Ersatztag ersatztag, "
-            . "Verlegungen_WWW.SplusVerlegungsname splusname "
-            . "FROM Verlegungen_WWW "
-            . "INNER JOIN Studiengaenge "
-            . "ON Studiengaenge.STGNR = Verlegungen_WWW.STGNR "
-            . "WHERE (Studiengaenge.STGNR = :stgnr) "
-            . "AND (Verlegungen_WWW.Fachsemester = :semester) "
-            . "AND (DATE(Verlegungen_WWW.Ausfalldatum)>=NOW() OR DATE(Verlegungen_WWW.Ersatzdatum)>=NOW()) "
-            . "ORDER BY ausfalldatum, ausfallzeit"; */
-
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':stgnr', $stgnr);
     $stmt->bindParam(':semester', $semester);
