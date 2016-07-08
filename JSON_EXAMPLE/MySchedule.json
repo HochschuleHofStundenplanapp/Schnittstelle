@@ -1,0 +1,47 @@
+{
+    "version": 3.1,
+    "myschedule": [
+        {
+            "id": "1332256",
+            "label": "Technische Materialflusssysteme",
+            "docent": "Prof. Dr. Valentin Plenk§§ Wolfgang Uschold",
+            "type": "Vorlesung Fixzeit",
+            "group": "",
+            "starttime": "08:00",
+            "endtime": "09:30",
+            "startdate": "21.03.2016",
+            "enddate": "19.12.2016",
+            "day": "Montag",
+            "room": "FA007",
+            "splusname": "TMS§vplenk_2+wuschold_1%45646\/45648 $ 2"
+        },
+        {
+            "id": "1332495",
+            "label": "Produktiver Betrieb hoch verfügbarer IT Systeme",
+            "docent": "Dipl.-Inf. Michael Kratsch",
+            "type": "Vorlesung Fixzeit",
+            "group": "",
+            "starttime": "08:00",
+            "endtime": "09:30",
+            "startdate": "21.03.2016",
+            "enddate": "19.12.2016",
+            "day": "Montag",
+            "room": "FB005",
+            "splusname": "ProdB§kratsch%46398 $ 2"
+        },
+        {
+            "id": "1332445",
+            "label": "Corporate Finance + Internationales Vertriebs- und Beschaffungsmanagement",
+            "docent": "  Prüfungsaufsicht",
+            "type": "Blockveranstaltung",
+            "group": "",
+            "starttime": "10:00",
+            "endtime": "11:30",
+            "startdate": "17.09.2016",
+            "enddate": "17.09.2016",
+            "day": "Samstag",
+            "room": "FA201",
+            "splusname": "X_CoFi#IVB§p1_ifw%46936\/46942 $ 2"
+        }
+    ]
+}

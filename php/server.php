@@ -1,8 +1,26 @@
 <?php
+/*
+  ~ Copyright (c) 2016 Lars Gaidzik & Lukas Mahr & Victor Dienstbier
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
+
 //include './mensa.php';        //Mensa deaktiviert!
 include './classes.php';
+const __VERSIONNUMBER = 3.1;
 
-const __VERSIONNUMBER = 3;
+
+
 
 $server = new SoapServer(
         null, array(                    //Parameter	Bedeutung                       Priorität
@@ -32,10 +50,10 @@ function getMenu(){
  */
 
 /** 
- * @return type Array aller Studiengänge
+ * @return type Array aller Studiengänge eines Semesterhalbjahres
  */
-function getCourses($tt){
-    require 'connect_db.php';
+function getCourses($tt){    
+    require 'connect_db.php';   
     
     $param_select = array(
         "sg.Bezeichnung",
@@ -76,6 +94,8 @@ function getCourses($tt){
  * 
  * @param type $stgnr =course(Studiengangnummer/STGNR)
  * @param type $semester =semester
+ * @param type $tt =semesterhalbjahr (SS/WS)
+ * @param type $id =Array aller ID's auf die gefiltert werden soll. (optional)
  * @return type Array über alle Vorlesungen eines Studienganges in einem Semester. Die Einträge sind nach Wochentag und Startzeitpunkt sortiert.
  */
 function getSchedule($stgnr, $semester, $tt, $id){
@@ -83,26 +103,26 @@ function getSchedule($stgnr, $semester, $tt, $id){
     if(!empty($stgnr) && !empty($semester) && !empty($tt)){
     require 'connect_db.php';
     $param_select = array(
-        "Stundenplan_WWW.id",
-        "Stundenplan_WWW.Bezeichnung label",
-        "IF (Stundenplan_WWW.Anzeigen_int=0 , Stundenplan_WWW.InternetName, '') docent",
-        "Stundenplan_WWW.VArt type",
-        "Stundenplan_WWW.Gruppe 'group'",
-        "DATE_FORMAT(Stundenplan_WWW.AnfDatum, '%H:%i') starttime",
-        "DATE_FORMAT(Stundenplan_WWW.Enddatum, '%H:%i') endtime",
-        "DATE_FORMAT(Stundenplan_WWW.AnfDatum, '%d.%m.%Y') startdate",
-        "DATE_FORMAT(Stundenplan_WWW.Enddatum, '%d.%m.%Y') enddate",
-        "Stundenplan_WWW.Tag_lang day",
-        "Stundenplan_WWW.RaumNr room",
-        "Stundenplan_WWW.SplusName splusname");
-    $param_where = array("(Studiengaenge.STGNR = :stgnr)","(Stundenplan_WWW.Fachsemester = :semester)", "(Stundenplan_WWW.WS_SS = :tt)");
-    $param_orderby=array("Stundenplan_WWW.Tag_Nr", "starttime");
+        "sp.id",
+        "sp.Bezeichnung label",
+        "IF (sp.Anzeigen_int=0 , sp.InternetName, '') docent",
+        "sp.VArt type",
+        "sp.Gruppe 'group'",
+        "DATE_FORMAT(sp.AnfDatum, '%H:%i') starttime",
+        "DATE_FORMAT(sp.Enddatum, '%H:%i') endtime",
+        "DATE_FORMAT(sp.AnfDatum, '%d.%m.%Y') startdate",
+        "DATE_FORMAT(sp.Enddatum, '%d.%m.%Y') enddate",
+        "sp.Tag_lang day",
+        "sp.RaumNr room",
+        "sp.SplusName splusname");
+    $param_where = array("(sg.STGNR = :stgnr)","(sp.Fachsemester = :semester)", "(sp.WS_SS = :tt)");
+    $param_orderby=array("sp.Tag_Nr", "starttime");
     
     if(!empty($id)){
-        array_push($param_where, "Stundenplan_WWW.id IN (".implode(",",$id).")");
+        array_push($param_where, "sp.id IN (".implode(",",$id).")");
     }
     $sql = "SELECT ".implode(' , ', $param_select).
-            " FROM Stundenplan_WWW INNER JOIN Studiengaenge ON Studiengaenge.STGNR = Stundenplan_WWW.STGNR "
+            " FROM Stundenplan_WWW AS sp JOIN Studiengaenge AS sg ON sg.STGNR = sp.STGNR "
             . " WHERE ".implode(' AND ', $param_where).
             " ORDER BY ".implode(' , ', $param_orderby);
     $stmt = $pdo->prepare($sql);
@@ -121,10 +141,9 @@ function getSchedule($stgnr, $semester, $tt, $id){
 }
 
 /**
- * 
- * @param type $stgnr =course(Studiengangnummer/STGNR)
- * @param type $semester =semester
- * @return type Array über alle Vorlesungen eines Studienganges in einem Semester. Die Einträge sind nach Wochentag und Startzeitpunkt sortiert.
+ *  
+ * @param type $id =Array aller Stundenplan_WWW ID's 
+ * @return type Array über alle Vorlesungen dessen ID's enthalten sind. Die Einträge sind nach Wochentag und Startzeitpunkt sortiert.
  */
 function getMySchedule($id){
     $result = array();
@@ -163,29 +182,37 @@ function getMySchedule($id){
     return addGeneralInfos("myschedule", $result);
 }
 
+/**
+ * 
+ * @param type $stgnr =studiengang
+ * @param type $semester =semesterjahr
+ * @param type $tt =semesterhalbjahr (SS/WS)
+ * @param type $id =Array aller ID's die gesucht werden sollen
+ * @return type Array das immer den Stundenplan der aktuellen Wochen mit den in dieser Woche fälligen Änderungen anzeigt.
+ */
 function getMergedSchedule($stgnr, $semester, $tt, $id) {
     $result = array();
     if(!empty($stgnr) && !empty($semester) && !empty($tt)){
     require 'connect_db.php';
  $param_select = array(
-        "Stundenplan_WWW.id",
-        "Stundenplan_WWW.Bezeichnung label",
-        "IF (Stundenplan_WWW.Anzeigen_int=0 , Stundenplan_WWW.InternetName, '') docent",
-        "Stundenplan_WWW.VArt type",
-        "Stundenplan_WWW.Gruppe 'group'",
-        "DATE_FORMAT(Stundenplan_WWW.AnfDatum, '%H:%i') starttime",
-        "DATE_FORMAT(Stundenplan_WWW.Enddatum, '%H:%i') endtime",
-        "DATE_FORMAT(Stundenplan_WWW.AnfDatum, '%d.%m.%Y') startdate",
-        "DATE_FORMAT(Stundenplan_WWW.Enddatum, '%d.%m.%Y') enddate",
-        "Stundenplan_WWW.Tag_lang day",
-        "Stundenplan_WWW.RaumNr room");
-    $param_where = array("(Studiengaenge.STGNR = :stgnr)","(Stundenplan_WWW.Fachsemester = :semester)", "(Stundenplan_WWW.WS_SS = :tt)");
-    $param_orderby=array("Stundenplan_WWW.Tag_Nr", "starttime");     
+        "sp.id",
+        "sp.Bezeichnung label",
+        "IF (sp.Anzeigen_int=0 , sp.InternetName, '') docent",
+        "sp.VArt type",
+        "sp.Gruppe 'group'",
+        "DATE_FORMAT(sp.AnfDatum, '%H:%i') starttime",
+        "DATE_FORMAT(sp.Enddatum, '%H:%i') endtime",
+        "DATE_FORMAT(sp.AnfDatum, '%d.%m.%Y') startdate",
+        "DATE_FORMAT(sp.Enddatum, '%d.%m.%Y') enddate",
+        "sp.Tag_lang day",
+        "sp.RaumNr room");
+    $param_where = array("(sg.STGNR = :stgnr)","(sp.Fachsemester = :semester)", "(sp.WS_SS = :tt)");
+    $param_orderby=array("sp.Tag_Nr", "starttime");     
     if(!empty($id)){
-        array_push($param_where, "Stundenplan_WWW.id IN (".implode(",",$id).")");
+        array_push($param_where, "sp.id IN (".implode(",",$id).")");
     }
     $sql = "SELECT ".implode(' , ', $param_select).
-            " FROM Stundenplan_WWW INNER JOIN Studiengaenge ON Studiengaenge.STGNR = Stundenplan_WWW.STGNR "
+            " FROM Stundenplan_WWW AS sp INNER JOIN Studiengaenge AS sg ON sg.STGNR = sp.STGNR "
             . " WHERE ".implode(' AND ', $param_where).
             " ORDER BY ".implode(' , ', $param_orderby); 
     $stmt = $pdo->prepare($sql);
@@ -241,6 +268,8 @@ function getMergedSchedule($stgnr, $semester, $tt, $id) {
  * 
  * @param type $stgnr =course(Studiengangnummer/STGNR)
  * @param type $semester =semester
+ * @param type $tt =semesterhalbjahr (SS/WS)
+ * @param type $id =Array aller ID's die gesucht werden sollen
  * @return type Array über alle Änderungen eines Studienganges in einem Semester. Die Einträge sind nach Ausfalltag und Ausfallzeitpunkt sortiert.
  */
 function getChanges($stgnr, $semester, $tt, $id) {
@@ -264,7 +293,7 @@ function getChanges($stgnr, $semester, $tt, $id) {
          "v.Raum ersatzraum",
          "v.Ersatztag ersatztag",
          "v.SplusVerlegungsname splusname");
-    $param_where = array("(v.STGNR = :stgnr)","(v.Fachsemester = :semester)","(DATE(v.Ausfalldatum)>=NOW() OR DATE(v.Ersatzdatum)>=NOW())", "(s.WS_SS = :tt)");
+    $param_where = array("(v.STGNR = :stgnr)","(s.STGNR = :stgnr)","(v.Fachsemester = :semester)","(DAYOFYEAR(DATE(v.Ausfalldatum))>=DAYOFYEAR(NOW()) OR DAYOFYEAR(DATE(v.Ersatzdatum))>=DAYOFYEAR(NOW()))", "(s.WS_SS = :tt)");
     $param_orderby=array("ausfalldatum", "ausfallzeit");
     if(!empty($id)){
         array_push($param_where, "s.id IN (".implode(",",$id).")");
@@ -304,11 +333,11 @@ function getChanges($stgnr, $semester, $tt, $id) {
     }
     // Datenbankverbindung schließen
     $pdo = null;
-    }
+    }   
     return addGeneralInfos("changes", $result);
 }
 
-$server->addFunction("getMenu");
+//$server->addFunction("getMenu");
 $server->addFunction("getSchedule");
 $server->addFunction("getMySchedule");
 $server->addFunction("getMergedSchedule");
