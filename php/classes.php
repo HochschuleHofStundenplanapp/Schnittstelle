@@ -33,8 +33,9 @@ class MSchedule {
     var $day; 
     var $room;
     var $changes;
+	var $comment;
     
-    function __construct($label, $docent, $type, $group, $starttime, $endtime, $startdate, $enddate, $day, $room) {        
+    function __construct($label, $docent, $type, $group, $starttime, $endtime, $startdate, $enddate, $day, $room, $comment) {        
         $this->label = $label;
         $this->docent = $docent;
         $this->type=$type;
@@ -45,6 +46,7 @@ class MSchedule {
         $this->enddate=$enddate;
         $this->day=$day;
         $this->room=$room;
+		$this->comment=$comment;
     }
     
     function setChanges($changes) {

@@ -114,7 +114,8 @@ function getSchedule($stgnr, $semester, $tt, $id){
         "DATE_FORMAT(sp.Enddatum, '%d.%m.%Y') enddate",
         "sp.Tag_lang day",
         "sp.RaumNr room",
-        "sp.SplusName splusname");
+        "sp.SplusName splusname",
+		"sp.Kommentar comment");
     $param_where = array("(sg.STGNR = :stgnr)","(sp.Fachsemester = :semester)", "(sp.WS_SS = :tt)");
     $param_orderby=array("sp.Tag_Nr", "starttime");
     
@@ -205,7 +206,8 @@ function getMergedSchedule($stgnr, $semester, $tt, $id) {
         "DATE_FORMAT(sp.AnfDatum, '%d.%m.%Y') startdate",
         "DATE_FORMAT(sp.Enddatum, '%d.%m.%Y') enddate",
         "sp.Tag_lang day",
-        "sp.RaumNr room");
+        "sp.RaumNr room",
+		"sp.Kommentar comment");
     $param_where = array("(sg.STGNR = :stgnr)","(sp.Fachsemester = :semester)", "(sp.WS_SS = :tt)");
     $param_orderby=array("sp.Tag_Nr", "starttime");     
     if(!empty($id)){
@@ -223,7 +225,7 @@ function getMergedSchedule($stgnr, $semester, $tt, $id) {
     $arrMSchedule = array();
     while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
         if($row['starttime'] != null && $row['endtime'] != null){
-            $arrMSchedule[$row['id']] = new MSchedule($row['label'], $row['docent'], $row['type'], $row['group'], $row['starttime'], $row['endtime'], $row['startdate'], $row['enddate'], $row['day'], $row['room']);
+            $arrMSchedule[$row['id']] = new MSchedule($row['label'], $row['docent'], $row['type'], $row['group'], $row['starttime'], $row['endtime'], $row['startdate'], $row['enddate'], $row['day'], $row['room'], $row['comment']);
         }
     }
     $stmt=null;
@@ -293,7 +295,7 @@ function getChanges($stgnr, $semester, $tt, $id) {
          "v.Raum ersatzraum",
          "v.Ersatztag ersatztag",
          "v.SplusVerlegungsname splusname");
-    $param_where = array("(v.STGNR = :stgnr)","(s.STGNR = :stgnr)","(v.Fachsemester = :semester)","(DAYOFYEAR(DATE(v.Ausfalldatum))>=DAYOFYEAR(NOW()) OR DAYOFYEAR(DATE(v.Ersatzdatum))>=DAYOFYEAR(NOW()))", "(s.WS_SS = :tt)");
+    $param_where = array("(v.STGNR = :stgnr)","(s.STGNR = :stgnr)","(v.Fachsemester = :semester)","(s.Fachsemester = :semester)","(DAYOFYEAR(DATE(v.Ausfalldatum))>=DAYOFYEAR(NOW()) OR DAYOFYEAR(DATE(v.Ersatzdatum))>=DAYOFYEAR(NOW()))", "(s.WS_SS = :tt)");
     $param_orderby=array("ausfalldatum", "ausfallzeit");
     if(!empty($id)){
         array_push($param_where, "s.id IN (".implode(",",$id).")");
