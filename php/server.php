@@ -24,7 +24,7 @@ const __VERSIONNUMBER = 3.1;
 
 $server = new SoapServer(
         null, array(                    //Parameter	Bedeutung                       Priorität
-    'uri' => "http://localhost",        //uri           Namespace des SOAP-Service	notwendig wenn WSDL nicht genutzt wird            
+    'uri' => "http://localhost/soap",   //uri           Namespace des SOAP-Service	notwendig wenn WSDL nicht genutzt wird            
     'encoding' => 'UTF-8',              //encoding	Zeichensatz für SOAP-Request	optional
     'soap_version' => SOAP_1_2          //soap_version	Eingesetzte Protokollversion	optional
         )
