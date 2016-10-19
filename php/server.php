@@ -15,12 +15,10 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
-//include './mensa.php';        //Mensa deaktiviert!
-include './classes.php';
+//require_once './mensa.php';        //Mensa deaktiviert!
+require_once './classes.php';
+
 const __VERSIONNUMBER = 3.1;
-
-
-
 
 $server = new SoapServer(
         null, array(                    //Parameter	Bedeutung                       Priorität
@@ -53,7 +51,7 @@ function getMenu(){
  * @return type Array aller Studiengänge eines Semesterhalbjahres
  */
 function getCourses($tt){    
-    require 'connect_db.php';   
+    require_once 'connect_db.php';   
     
     $param_select = array(
         "sg.Bezeichnung",
