@@ -9,3 +9,5 @@ Ordner (genauere Informationen sind den README's der jeweiligen Ordner zu entneh
 Dateien:
 	LICENSE.txt= allgemeine Lizenzbedingung
 	dump.sql= enthält einen MySQL-Dump für das lokale Testen. (DATEN VERALTET!)
+	
+# Bitte auch im Wiki schauen, bzw. dort die Dokumentation fortführen
