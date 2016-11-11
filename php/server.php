@@ -160,8 +160,9 @@ function getMySchedule($id){
         "DATE_FORMAT(sp.Enddatum, '%d.%m.%Y') enddate",
         "sp.Tag_lang day",
         "sp.RaumNr room",
-        "sp.SplusName splusname");
-    $param_where = array( "sp.id IN (".implode(",",$id).")");    
+        "sp.SplusName splusname",
+		"sp.Kommentar comment");
+    $param_where = array( "sp.id IN (".implode(",",$id).")");
     $param_orderby=array("sp.Tag_Nr", "starttime");
 
     
@@ -169,7 +170,7 @@ function getMySchedule($id){
             " FROM Stundenplan_WWW as sp "
             . " WHERE ".implode(' AND ', $param_where).
             " ORDER BY ".implode(' , ', $param_orderby);
-    $stmt = $pdo->prepare($sql);  
+    $stmt = $pdo->prepare($sql);
     $stmt->execute();
     while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
         if($row['starttime']!= null && $row['endtime']!=null){
@@ -270,70 +271,78 @@ function getMergedSchedule($stgnr, $semester, $tt, $id) {
  * @param type $semester =semester
  * @param type $tt =semesterhalbjahr (SS/WS)
  * @param type $id =Array aller ID's die gesucht werden sollen
- * @return type Array über alle Änderungen eines Studienganges in einem Semester. Die Einträge sind nach Ausfalltag und Ausfallzeitpunkt sortiert.
+ * @return type Array über alle Änderungen eines Studienganges in einem Semester oder alle Änderungen zu den übergebenen ID's. Die Einträge sind nach Ausfalltag und Ausfallzeitpunkt sortiert.
  */
 function getChanges($stgnr, $semester, $tt, $id) {
     $result = array();
-    if(!empty($stgnr) && !empty($semester) && !empty($tt)){
-    require 'connect_db.php';
-    
-     $param_select = array(
-         "v.id",
-        "v.Bezeichnung bezeichnung",
-        "IF (v.Anzeigen_int=0, v.InternetName, '') dozent",
-        "v.Tag_lang ausfalltag",
-        "v.Kommentar kommentar",
-        "v.Gruppe gruppe",
-        "DATE_FORMAT(v.Ausfalldatum, '%H:%i') ausfallzeit",
-        "DATE_FORMAT(v.Ausfalldatum, '%d.%m.%Y') ausfalldatum",
-        "v.RaumNr ausfallraum",
-        "v.Ausfallgrund ausfallgrund",
-        "DATE_FORMAT(v.Ersatzdatum, '%H:%i') ersatzzeit",
-        "DATE_FORMAT(v.Ersatzdatum, '%d.%m.%Y') ersatzdatum",
-         "v.Raum ersatzraum",
-         "v.Ersatztag ersatztag",
-         "v.SplusVerlegungsname splusname");
-    $param_where = array("(v.STGNR = :stgnr)","(s.STGNR = :stgnr)","(v.Fachsemester = :semester)","(s.Fachsemester = :semester)","(DAYOFYEAR(DATE(v.Ausfalldatum))>=DAYOFYEAR(NOW()) OR DAYOFYEAR(DATE(v.Ersatzdatum))>=DAYOFYEAR(NOW()))", "(s.WS_SS = :tt)");
-    $param_orderby=array("ausfalldatum", "ausfallzeit");
-    if(!empty($id)){
-        array_push($param_where, "s.id IN (".implode(",",$id).")");
-    }
-    
-    $sql = "SELECT ".implode(", ", $param_select)
-            ." FROM Stundenplan_WWW as s INNER JOIN Verlegungen_WWW as v ON SUBSTRING_INDEX(s.SplusName, '$', '1')=SUBSTRING_INDEX(v.SplusVerlegungsname,'$','1')"
-            . " WHERE ".implode(" AND ", $param_where)
-            ." ORDER BY ".implode(", ",$param_orderby);
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':stgnr', $stgnr);
-    $stmt->bindParam(':semester', $semester);
-    $stmt->bindParam(':tt', $tt);
-    $stmt->execute();    
-    while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
-        if($row['ausfallzeit']!= null){
-        $result[] = array(
-            "id"=>$row['id'],
-            "label"=>$row['bezeichnung'], 
-            "docent" => $row['dozent'],             
-            "comment"=>$row['kommentar'], 
-            "reason" => $row['ausfallgrund'],
-            "group" => $row['gruppe'],
-            "splusname" => $row['splusname'],
-            "original" => array(
-                "day" => $row['ausfalltag'], 
-                "time" => $row['ausfallzeit'], 
-                "date" => $row['ausfalldatum'], 
-                "room" => $row['ausfallraum']), 
-            "alternative"=> ($row['ersatztag']!=null && $row['ersatzzeit']!= null) ? array(
-                "day" => $row['ersatztag'], 
-                "time" => $row['ersatzzeit'], 
-                "date" => $row['ersatzdatum'], 
-                "room" => $row['ersatzraum']): null,            
-            );
-        }
-    }
-    // Datenbankverbindung schließen
-    $pdo = null;
-    }   
+	// entweder (studiengang, semester und termtime) oder ids müssen gefüllt sein
+	if((!empty($stgnr) && !empty($semester) && !empty($tt)) || !empty($id)){
+		require 'connect_db.php';
+		
+		$param_select = array(
+			"v.id",
+			"v.Bezeichnung bezeichnung",
+			"IF (v.Anzeigen_int=0, v.InternetName, '') dozent",
+			"v.Tag_lang ausfalltag",
+			"v.Kommentar kommentar",
+			"v.Gruppe gruppe",
+			"DATE_FORMAT(v.Ausfalldatum, '%H:%i') ausfallzeit",
+			"DATE_FORMAT(v.Ausfalldatum, '%d.%m.%Y') ausfalldatum",
+			"v.RaumNr ausfallraum",
+			"v.Ausfallgrund ausfallgrund",
+			"DATE_FORMAT(v.Ersatzdatum, '%H:%i') ersatzzeit",
+			"DATE_FORMAT(v.Ersatzdatum, '%d.%m.%Y') ersatzdatum",
+			"v.Raum ersatzraum",
+			"v.Ersatztag ersatztag",
+			"v.SplusVerlegungsname splusname");
+		
+		if(!empty($stgnr) && !empty($semester) && !empty($tt)){
+			$param_where = array("(v.STGNR = :stgnr)","(s.STGNR = :stgnr)","(v.Fachsemester = :semester)","(s.Fachsemester = :semester)","((DATEDIFF(DATE(v.Ausfalldatum),NOW()) >= 0) OR (DATEDIFF(DATE(v.Ersatzdatum),NOW()) >= 0))", "(s.WS_SS = :tt)");
+			if(!empty($id)){
+				array_push($param_where, "s.id IN (".implode(",",$id).")");
+			}
+		} else {
+			// ids sind nicht leer
+			$param_where = array("s.id IN (".implode(",",$id).")","((DATEDIFF(DATE(v.Ausfalldatum),NOW()) >= 0) OR (DATEDIFF(DATE(v.Ersatzdatum),NOW()) >= 0))");
+		}
+		
+		$param_orderby=array("ausfalldatum", "ausfallzeit");
+		
+		$sql = "SELECT ".implode(", ", $param_select)
+				." FROM Stundenplan_WWW as s INNER JOIN Verlegungen_WWW as v ON SUBSTRING_INDEX(s.SplusName, '$', '1')=SUBSTRING_INDEX(v.SplusVerlegungsname,'$','1')"
+				. " WHERE ".implode(" AND ", $param_where)
+				." ORDER BY ".implode(", ",$param_orderby);
+		$stmt = $pdo->prepare($sql);
+		$stmt->bindParam(':stgnr', $stgnr);
+		$stmt->bindParam(':semester', $semester);
+		$stmt->bindParam(':tt', $tt);
+		$stmt->execute();    
+		while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
+			if($row['ausfallzeit']!= null){
+			$result[] = array(
+				"id"=>$row['id'],
+				"label"=>$row['bezeichnung'], 
+				"docent" => $row['dozent'],             
+				"comment"=>$row['kommentar'], 
+				"reason" => $row['ausfallgrund'],
+				"group" => $row['gruppe'],
+				"splusname" => $row['splusname'],
+				"original" => array(
+					"day" => $row['ausfalltag'], 
+					"time" => $row['ausfallzeit'], 
+					"date" => $row['ausfalldatum'], 
+					"room" => $row['ausfallraum']), 
+				"alternative"=> ($row['ersatztag']!=null && $row['ersatzzeit']!= null) ? array(
+					"day" => $row['ersatztag'], 
+					"time" => $row['ersatzzeit'], 
+					"date" => $row['ersatzdatum'], 
+					"room" => $row['ersatzraum']): null,            
+				);
+			}
+		}
+		// Datenbankverbindung schließen
+		$pdo = null;
+	}
     return addGeneralInfos("changes", $result);
 }
 
