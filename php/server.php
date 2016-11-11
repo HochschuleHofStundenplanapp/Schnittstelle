@@ -18,7 +18,7 @@
 //require_once './mensa.php';        //Mensa deaktiviert!
 require_once './classes.php';
 
-const __VERSIONNUMBER = 3.1;
+const __VERSIONNUMBER = 3.2;
 
 $server = new SoapServer(
         null, array(                    //Parameter	Bedeutung                       Priorität
@@ -143,6 +143,9 @@ function getSchedule($stgnr, $semester, $tt, $id){
  *  
  * @param type $id =Array aller Stundenplan_WWW ID's 
  * @return type Array über alle Vorlesungen dessen ID's enthalten sind. Die Einträge sind nach Wochentag und Startzeitpunkt sortiert.
+ *
+ * Erweiterung:
+ *  comment wird mit zurueckgegeben.
  */
 function getMySchedule($id){
     $result = array();
@@ -161,7 +164,7 @@ function getMySchedule($id){
         "sp.Tag_lang day",
         "sp.RaumNr room",
         "sp.SplusName splusname",
-		"sp.Kommentar comment");
+        "sp.Kommentar comment");
     $param_where = array( "sp.id IN (".implode(",",$id).")");
     $param_orderby=array("sp.Tag_Nr", "starttime");
 
@@ -267,6 +270,10 @@ function getMergedSchedule($stgnr, $semester, $tt, $id) {
 
 /**
  * 
+ * Abfrage mit: stgnr, semester, tt oder mit der id des Kurses
+ * 
+ * Rückgabe auch des comment
+ *
  * @param type $stgnr =course(Studiengangnummer/STGNR)
  * @param type $semester =semester
  * @param type $tt =semesterhalbjahr (SS/WS)
@@ -354,3 +361,4 @@ $server->addFunction("getCourses");
 $server->addFunction("getChanges");
 
 $server->handle();
+
