@@ -1,0 +1,35 @@
+Von:	Jonas Beetz <jonas.beetz@hof-university.de>
+Gesendet:	Samstag, 14. Januar 2017 21:46
+An:	Michael Stepping
+Betreff:	Re: Diagramm FCM
+Anlagen:	FCM.html.xml.html
+
+Die Datei habe ich mit draw.io erstellt. Ist ne (meiner Meinung nach) richtig gute Homepage mit 
+der man Diagramme für alle mögliche Diagrammtypen erstellen kann. Unter anderem auch für 
+Wireframes. Und das Beste ist, es kostet nichts… 
+
+Die Datei können wir gerne auf Github stellen. Ist ne einfache HTML Datei. Ich hab sie in den 
+Anhang. 
+Zum Öffnen einfach auf draw.io gehen und dann „Device“ und dann die Datei von der Festplatte 
+auswählen. 
+
+Schöne Grüße
+Jonas
+
+
+-----Ursprüngliche Nachricht----- 
+Von: Jonas Beetz [mailto:jonas.beetz@hof-university.de] 
+Gesendet: Samstag, 14. Januar 2017 21:26 
+An: Michael Stepping <michael.stepping@hof-university.de> 
+Betreff: Diagramm FCM 
+ 
+Schönen Guten Abend, 
+ 
+ich habe jetzt mal versucht den Ablauf von Firebase Cloud 
+Messaging in der 
+Stundenplanapp zu skizzieren. Die Datei ist im Anhang. Ich hoffe 
+es ist 
+einigermaßen verständlich. 
+ 
+Beste Grüße 
+Jonas
