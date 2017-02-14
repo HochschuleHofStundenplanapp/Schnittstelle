@@ -89,11 +89,12 @@ function getCourses($tt){
 }
 
 /**
+ * Den Stundenplan bekommen
  * 
- * @param type $stgnr =course(Studiengangnummer/STGNR)
- * @param type $semester =semester
- * @param type $tt =semesterhalbjahr (SS/WS)
- * @param type $id =Array aller ID's auf die gefiltert werden soll. (optional)
+ * @param type $stgnr 		= course(Studiengangnummer/STGNR)
+ * @param type $semester 	= semester
+ * @param type $tt 			= semesterhalbjahr (SS/WS)
+ * @param type $id 			= Array aller splusname's der Vorlesungen nach dehnen gefiltert werden soll (optional)
  * @return type Array über alle Vorlesungen eines Studienganges in einem Semester. Die Einträge sind nach Wochentag und Startzeitpunkt sortiert.
  */
 function getSchedule($stgnr, $semester, $tt, $id){
@@ -118,7 +119,7 @@ function getSchedule($stgnr, $semester, $tt, $id){
     $param_orderby=array("sp.Tag_Nr", "starttime");
     
     if(!empty($id)){
-        array_push($param_where, "sp.id IN (".implode(",",$id).")");
+        array_push($param_where, "sp.splusname IN (".implode(",",$id).")");
     }
     $sql = "SELECT ".implode(' , ', $param_select).
             " FROM Stundenplan_WWW AS sp JOIN Studiengaenge AS sg ON sg.STGNR = sp.STGNR "
@@ -140,12 +141,10 @@ function getSchedule($stgnr, $semester, $tt, $id){
 }
 
 /**
- *  
- * @param type $id =Array aller Stundenplan_WWW ID's 
+ * Den individuellen Stundenplan bekommen
+ * 
+ * @param type $id = Array aller splusname's der Vorlesungen nach dehnen gefiltert werden soll
  * @return type Array über alle Vorlesungen dessen ID's enthalten sind. Die Einträge sind nach Wochentag und Startzeitpunkt sortiert.
- *
- * Erweiterung:
- *  comment wird mit zurueckgegeben.
  */
 function getMySchedule($id){
     $result = array();
@@ -165,7 +164,7 @@ function getMySchedule($id){
         "sp.RaumNr room",
         "sp.SplusName splusname",
         "sp.Kommentar comment");
-    $param_where = array( "sp.id IN (".implode(",",$id).")");
+    $param_where = array( "sp.splusname IN (".implode(",",$id).")");
     $param_orderby=array("sp.Tag_Nr", "starttime");
 
     
@@ -187,10 +186,10 @@ function getMySchedule($id){
 
 /**
  * 
- * @param type $stgnr =studiengang
- * @param type $semester =semesterjahr
- * @param type $tt =semesterhalbjahr (SS/WS)
- * @param type $id =Array aller ID's die gesucht werden sollen
+ * @param type $stgnr 		= studiengang
+ * @param type $semester 	= semesterjahr
+ * @param type $tt 			= semesterhalbjahr (SS/WS)
+ * @param type $id 			= Array aller splusname's der Vorlesungen nach dehnen gefiltert werden soll
  * @return type Array das immer den Stundenplan der aktuellen Wochen mit den in dieser Woche fälligen Änderungen anzeigt.
  */
 function getMergedSchedule($stgnr, $semester, $tt, $id) {
@@ -213,7 +212,7 @@ function getMergedSchedule($stgnr, $semester, $tt, $id) {
     $param_where = array("(sg.STGNR = :stgnr)","(sp.Fachsemester = :semester)", "(sp.WS_SS = :tt)");
     $param_orderby=array("sp.Tag_Nr", "starttime");     
     if(!empty($id)){
-        array_push($param_where, "sp.id IN (".implode(",",$id).")");
+        array_push($param_where, "sp.splusname IN (".implode(",",$id).")");
     }
     $sql = "SELECT ".implode(' , ', $param_select).
             " FROM Stundenplan_WWW AS sp INNER JOIN Studiengaenge AS sg ON sg.STGNR = sp.STGNR "
@@ -269,16 +268,21 @@ function getMergedSchedule($stgnr, $semester, $tt, $id) {
 }
 
 /**
+ * Die Änderungen bekommen
+ * entweder für einen Studiengang in einem Semester oder für die Vorlesungen der übergebene IDs
  * 
- * Abfrage mit: stgnr, semester, tt oder mit der id des Kurses
+ * Abfrage mit: stgnr, semester, tt und/oder mit den splusname's der Vorlesungen
  * 
  * Rückgabe auch des comment
  *
- * @param type $stgnr =course(Studiengangnummer/STGNR)
- * @param type $semester =semester
- * @param type $tt =semesterhalbjahr (SS/WS)
- * @param type $id =Array aller ID's die gesucht werden sollen
- * @return type Array über alle Änderungen eines Studienganges in einem Semester oder alle Änderungen zu den übergebenen ID's. Die Einträge sind nach Ausfalltag und Ausfallzeitpunkt sortiert.
+ * @param type $stgnr 		= course(Studiengangnummer/STGNR)
+ * @param type $semester 	= semester
+ * @param type $tt 			= semesterhalbjahr (SS/WS)
+ * @param type $id 			= Array aller splusname's der Vorlesungen nach dehnen gefiltert werden soll
+ * @return type Array über alle Änderungen eines Studienganges in einem Semester
+ *  oder alle Änderungen eines Studienganges in einem Semester zu den übergebenen splusname's
+ *  oder alle Änderungen zu den übergebenen splusname's.
+ *  Die Einträge sind nach Ausfalltag und Ausfallzeitpunkt sortiert.
  */
 function getChanges($stgnr, $semester, $tt, $id) {
     $result = array();
@@ -306,11 +310,13 @@ function getChanges($stgnr, $semester, $tt, $id) {
 		if(!empty($stgnr) && !empty($semester) && !empty($tt)){
 			$param_where = array("(v.STGNR = :stgnr)","(s.STGNR = :stgnr)","(v.Fachsemester = :semester)","(s.Fachsemester = :semester)","((DATEDIFF(DATE(v.Ausfalldatum),NOW()) >= 0) OR (DATEDIFF(DATE(v.Ersatzdatum),NOW()) >= 0))", "(s.WS_SS = :tt)");
 			if(!empty($id)){
-				array_push($param_where, "s.id IN (".implode(",",$id).")");
+				// TODO SUBSTRING von s.splusname um den hinteren Teil zu entfernen
+				array_push($param_where, "s.splusname IN (".implode(",",$id).")");
 			}
 		} else {
 			// ids sind nicht leer
-			$param_where = array("s.id IN (".implode(",",$id).")","((DATEDIFF(DATE(v.Ausfalldatum),NOW()) >= 0) OR (DATEDIFF(DATE(v.Ersatzdatum),NOW()) >= 0))");
+			// TODO SUBSTRING von s.splusname um den hinteren Teil zu entfernen
+			$param_where = array("s.splusname IN (".implode(",",$id).")","((DATEDIFF(DATE(v.Ausfalldatum),NOW()) >= 0) OR (DATEDIFF(DATE(v.Ersatzdatum),NOW()) >= 0))");
 		}
 		
 		$param_orderby=array("ausfalldatum", "ausfallzeit");
