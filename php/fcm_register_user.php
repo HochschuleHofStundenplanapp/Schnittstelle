@@ -1,6 +1,6 @@
 <?php
 
-require "init.php";
+require "fcm_connect_db.php";
 $fcm_token = $_POST["fcm_token"];
 $lectureJSON = $_POST["vorlesung_id"];
 $lectureArray = json_decode($lectureJSON,true);

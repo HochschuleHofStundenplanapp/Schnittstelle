@@ -1,6 +1,6 @@
 <?php
 
-require "init.php";
+require "fcm_connect_db.php";
 require "server.php";
 
 $sql = "SELECT vorlesung_id FROM fcm_nutzer GROUP BY vorlesung_id";
