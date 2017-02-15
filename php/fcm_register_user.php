@@ -58,7 +58,7 @@ $lectureJSON = $_POST["vorlesung_id"];
 $lectureArray = json_decode($lectureJSON,true);
 
 
-if ($debug) { echo "\nToken: $fcm_token\n\nlectureJSON: $lectureJSON\n\nlectureArray: $lectureArray\n";}
+if ($debug) { echo "\nToken: $fcm_token\n\nlectureJSON: $lectureJSON\n";}
 
 //Alle Einträge mit diesem Token in DB löschen
 $sqldelete = "DELETE FROM fcm_nutzer WHERE token = \"$fcm_token\" ";
@@ -69,6 +69,7 @@ for ($i = 0; $i < count($lectureArray); $i++)
 {
 	// htmlentities wegen SQL-Injection
 	$vorlesung_id = htmlentities ( $lectureArray[$i]['vorlesung_id'] );
+	if ($debug) { echo "\nVorlesung_id: $vorlesung_id\n";}
 	$sqlinsert = "INSERT INTO `fcm_nutzer`(`token`, `vorlesung_id`) VALUES (\"$fcm_token\",\"$vorlesung_id\")";
 	mysqli_query($con,$sqlinsert);
 }
