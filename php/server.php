@@ -150,6 +150,8 @@ function getMySchedule($id){
     $result = array();
     if(!empty($id)){
     require 'connect_db.php';
+	// TODO Testausgabe entfernen
+	var_dump $id;
     $param_select = array(
         "sp.id",
         "sp.Bezeichnung label",

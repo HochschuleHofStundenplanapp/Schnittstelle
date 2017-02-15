@@ -17,10 +17,14 @@
 // SoapClient
 try {
     $options = array(
-        "location" => "http://localhost/project/server.php",
-        "uri" => "http://test-uri",
+#        "location" => "http://localhost/soap/server.php",
+        "location" => "https://app.hof-university.de/soap/server.php",
+#        "uri" => "http://localhost/soap/",
+        "uri" => "https://app.hof-university.de/soap/",
         'encoding' => 'UTF-8',
-#        'encoding' => 'ISO-8859-15',
+//        'encoding' => 'ISO-8859-15',
+        'login' => 'soapuser',
+        'password' => 'F%98z&12',
         'soap_version' => SOAP_1_1,
         'exceptions' => true,
         'trace' => 1,
@@ -81,11 +85,16 @@ try {
  */
 
         default:
-            include './docs.php';
+            header('Content-Type: text/html');
+            echo utf8_decode("Not a valid function <br />\n");
+// #### hk entfernt damit die Dokumentation nicht angezeigt wird
+// ####            include './docs.php';
             break;                
     }    
 } catch (Exception $e) {
     echo "Caught exception: ", $e->getMessage(), "\n";
+	// TODO Mehr Information wieder entfernen!
+	echo "\nMore Information: ", var_dump($e), "\n";
 }
 
 /**
