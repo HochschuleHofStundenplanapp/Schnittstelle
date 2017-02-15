@@ -100,43 +100,51 @@ function getCourses($tt){
  */
 function getSchedule($stgnr, $semester, $tt, $id){
     $result = array();
-    if(!empty($stgnr) && !empty($semester) && !empty($tt)){
-    require 'connect_db.php';
-    $param_select = array(
-        "sp.id",
-        "sp.Bezeichnung label",
-        "IF (sp.Anzeigen_int=0 , sp.InternetName, '') docent",
-        "sp.VArt type",
-        "sp.Gruppe 'group'",
-        "DATE_FORMAT(sp.AnfDatum, '%H:%i') starttime",
-        "DATE_FORMAT(sp.Enddatum, '%H:%i') endtime",
-        "DATE_FORMAT(sp.AnfDatum, '%d.%m.%Y') startdate",
-        "DATE_FORMAT(sp.Enddatum, '%d.%m.%Y') enddate",
-        "sp.Tag_lang day",
-        "sp.RaumNr room",
-        "sp.SplusName splusname",
-		"sp.Kommentar comment");
-    $param_where = array("(sg.STGNR = :stgnr)","(sp.Fachsemester = :semester)", "(sp.WS_SS = :tt)");
-    $param_orderby=array("sp.Tag_Nr", "starttime");
+    if ( !empty($stgnr) && !empty($semester) && !empty($tt) )
+    {
+	    require 'connect_db.php';
+	    $param_select = array(
+				"sp.id",
+				"sp.Bezeichnung label",
+				"IF (sp.Anzeigen_int=0 , sp.InternetName, '') docent",
+				"sp.VArt type",
+				"sp.Gruppe 'group'",
+				"DATE_FORMAT(sp.AnfDatum, '%H:%i') starttime",
+				"DATE_FORMAT(sp.Enddatum, '%H:%i') endtime",
+				"DATE_FORMAT(sp.AnfDatum, '%d.%m.%Y') startdate",
+				"DATE_FORMAT(sp.Enddatum, '%d.%m.%Y') enddate",
+				"sp.Tag_lang day",
+				"sp.RaumNr room",
+				"sp.SplusName splusname",
+				"sp.Kommentar comment");
+	    $param_where = array("(sg.STGNR = :stgnr)","(sp.Fachsemester = :semester)", "(sp.WS_SS = :tt)");
+	    $param_orderby=array("sp.Tag_Nr", "starttime");
     
-    if(!empty($id)){
-        array_push($param_where, "sp.splusname IN (".implode(",",$id).")");
-    }
-    $sql = "SELECT ".implode(' , ', $param_select).
-            " FROM Stundenplan_WWW AS sp JOIN Studiengaenge AS sg ON sg.STGNR = sp.STGNR "
-            . " WHERE ".implode(' AND ', $param_where).
-            " ORDER BY ".implode(' , ', $param_orderby);
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':stgnr', $stgnr);
-    $stmt->bindParam(':semester', $semester);
-    $stmt->bindParam(':tt', $tt);    
-    $stmt->execute();
-    while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
-        if($row['starttime']!= null && $row['endtime']!=null){
-            $result[] = $row;
-        }
-    }
-    $pdo = null;
+	    if( !empty($id) )
+	    {
+	    		// überschreiben des Parameters
+	        array_push($param_where, "sp.SplusName IN (".implode("," , $id ). ")");
+	    }
+    
+			$sql = "SELECT ".implode(' , ', $param_select)
+				." FROM Stundenplan_WWW AS sp JOIN Studiengaenge AS sg ON sg.STGNR = sp.STGNR "
+				." WHERE ".implode(' AND ', $param_where)
+				." ORDER BY ".implode(' , ', $param_orderby);
+			$stmt = $pdo->prepare($sql);
+			$stmt->bindParam(':stgnr', $stgnr);
+			$stmt->bindParam(':semester', $semester);
+			$stmt->bindParam(':tt', $tt);    
+			$stmt->execute();
+			while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) 
+			{
+			    if ( ($row['starttime']!= null) 
+			    		&& ($row['endtime']!=null)
+			    		)
+			    {
+			        $result[] = $row;
+			    }
+			}
+			$pdo = null;
     }
     return addGeneralInfos("schedule", $result);
 }
@@ -147,12 +155,17 @@ function getSchedule($stgnr, $semester, $tt, $id){
  * @param type $id = Array aller splusname's der Vorlesungen nach dehnen gefiltert werden soll
  * @return type Array über alle Vorlesungen dessen ID's enthalten sind. Die Einträge sind nach Wochentag und Startzeitpunkt sortiert.
  */
-function getMySchedule($id){
+function getMySchedule($id)
+{
     $result = array();
-    if(!empty($id)){
-    require 'connect_db.php';
-	// TODO Testausgabe entfernen
-	var_dump $id;
+    if( !empty($id) )
+    {
+	    require_once 'connect_db.php';
+	
+// TODO Testausgabe entfernen
+//var_dump $id;
+//print_r $id;
+	
     $param_select = array(
         "sp.id",
         "sp.Bezeichnung label",
@@ -167,7 +180,7 @@ function getMySchedule($id){
         "sp.RaumNr room",
         "sp.SplusName splusname",
         "sp.Kommentar comment");
-    $param_where = array( "sp.splusname IN (".implode(",",$id).")");
+    $param_where = array( "sp.SplusName IN (".implode(",",$id).")");
     $param_orderby=array("sp.Tag_Nr", "starttime");
 
     
@@ -215,7 +228,7 @@ function getMergedSchedule($stgnr, $semester, $tt, $id) {
     $param_where = array("(sg.STGNR = :stgnr)","(sp.Fachsemester = :semester)", "(sp.WS_SS = :tt)");
     $param_orderby=array("sp.Tag_Nr", "starttime");     
     if(!empty($id)){
-        array_push($param_where, "sp.splusname IN (".implode(",",$id).")");
+        array_push($param_where, "sp.SplusName IN (".implode(",",$id).")");
     }
     $sql = "SELECT ".implode(' , ', $param_select).
             " FROM Stundenplan_WWW AS sp INNER JOIN Studiengaenge AS sg ON sg.STGNR = sp.STGNR "
@@ -313,13 +326,13 @@ function getChanges($stgnr, $semester, $tt, $id) {
 		if(!empty($stgnr) && !empty($semester) && !empty($tt)){
 			$param_where = array("(v.STGNR = :stgnr)","(s.STGNR = :stgnr)","(v.Fachsemester = :semester)","(s.Fachsemester = :semester)","((DATEDIFF(DATE(v.Ausfalldatum),NOW()) >= 0) OR (DATEDIFF(DATE(v.Ersatzdatum),NOW()) >= 0))", "(s.WS_SS = :tt)");
 			if(!empty($id)){
-				// TODO SUBSTRING von s.splusname um den hinteren Teil zu entfernen
-				array_push($param_where, "s.splusname IN (".implode(",",$id).")");
+				// TODO SUBSTRING von s.SplusName um den hinteren Teil zu entfernen
+				array_push($param_where, "s.SplusName IN (".implode(",",$id).")");
 			}
 		} else {
 			// ids sind nicht leer
-			// TODO SUBSTRING von s.splusname um den hinteren Teil zu entfernen
-			$param_where = array("s.splusname IN (".implode(",",$id).")","((DATEDIFF(DATE(v.Ausfalldatum),NOW()) >= 0) OR (DATEDIFF(DATE(v.Ersatzdatum),NOW()) >= 0))");
+			// TODO SUBSTRING von s.SplusName um den hinteren Teil zu entfernen
+			$param_where = array("s.SplusName IN (".implode(",",$id).")","((DATEDIFF(DATE(v.Ausfalldatum),NOW()) >= 0) OR (DATEDIFF(DATE(v.Ersatzdatum),NOW()) >= 0))");
 		}
 		
 		$param_orderby=array("ausfalldatum", "ausfallzeit");
