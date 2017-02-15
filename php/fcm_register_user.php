@@ -53,11 +53,12 @@ require "fcm_connect_db.php";
 
 // Alle übergebeenen Parameter entwerten, um SQL-Injection aus dem Weg zu gehen
 $fcm_token = htmlentities( $_POST["fcm_token"] );
-$lectureJSON = htmlentities( $_POST["vorlesung_id"] ) ;
+// passiert hier weiter unten
+$lectureJSON = $_POST["vorlesung_id"];
 $lectureArray = json_decode($lectureJSON,true);
 
 
-if ($debug) { echo "\nToken: $fcm_token\n\nlectureJSON: $lectureJSON\n";}
+if ($debug) { echo "\nToken: $fcm_token\n\nlectureJSON: $lectureJSON\n\nlectureArray: $lectureArray\n";}
 
 //Alle Einträge mit diesem Token in DB löschen
 $sqldelete = "DELETE FROM fcm_nutzer WHERE token = \"$fcm_token\" ";
@@ -66,17 +67,13 @@ mysqli_query($con,$sqldelete);
 //Tokens und Vorlesungn in DB eintragen
 for ($i = 0; $i < count($lectureArray); $i++) 
 {
-	$vorlesung_id = $lectureArray[$i]['vorlesung_id'];
+	// htmlentities wegen SQL-Injection
+	$vorlesung_id = htmlentities ( $lectureArray[$i]['vorlesung_id'] );
 	$sqlinsert = "INSERT INTO `fcm_nutzer`(`token`, `vorlesung_id`) VALUES (\"$fcm_token\",\"$vorlesung_id\")";
 	mysqli_query($con,$sqlinsert);
 }
 
 mysqli_close($con);
-
-// DEBUG
-print("funktioniert!");
-print($fcm_token);
-print($lectureJSON);
 
 return("Funktioniert!");
 ?>
