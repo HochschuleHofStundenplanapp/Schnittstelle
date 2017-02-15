@@ -11,3 +11,11 @@ Dateien:
 	dump.sql= enthält einen MySQL-Dump für das lokale Testen. (DATEN VERALTET!)
 	
 # Bitte auch im Wiki schauen, bzw. dort die Dokumentation fortführen
+
+
+
+https://soapuser:F%98z&12@app.hof-university.de/soap/client.php?f=Schedule&stg=MC&sem=6&tt=SS&debug=1
+
+https://soapuser:F%98z&12@app.hof-university.de/soap/client.php?f=Courses&tt=SS&debug=1
+
+
