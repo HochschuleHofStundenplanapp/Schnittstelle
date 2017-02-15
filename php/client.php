@@ -26,7 +26,7 @@ if ( isset( $_REQUEST['debug'] ))
 	ini_set('mysql.trace_mode',  'On' );
 	ini_set('mysqli.trace_mode',  'On' );
 
-	ini_set('error_reporting', E_ALL | E_STRICT | E_DEPRECATED | E_NOTICE );
+	ini_set('error_reporting', E_ALL | E_STRICT | E_DEPRECATED | E_NOTICE | E_PARSE );
 
 	ini_set('display_errors', 'On' );
 	ini_set('display_startup_errors', 'On' ) ;
@@ -43,6 +43,11 @@ if ( isset( $_REQUEST['debug'] ))
 	ini_set('mysqli.log_slow_admin_statements','on');
 	ini_set('mysqli.slow_query_log','on');
 	ini_set('mysqli.log_error_verbosity','3');
+
+// E_NOTICE ist sinnvoll um uninitialisierte oder
+// falsch geschriebene Variablen zu entdecken
+error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE | E_STRICT );
+
 }
 
 
@@ -58,8 +63,9 @@ try {
 //        'encoding' => 'ISO-8859-15',
         'login' => 'soapuser',
         'password' => 'F%98z&12',
-        'soap_version' => SOAP_1_1,
-        'exceptions' => true,
+        'soap_version' => SOAP_1_2,
+        'exceptions' => false,
+//        'exceptions' => true,
         'trace' => 1,
         'cache_wsdl' => WSDL_CACHE_NONE
     );
@@ -80,58 +86,81 @@ try {
         'id'=>array('filter' => FILTER_VALIDATE_INT,'flags'  => FILTER_REQUIRE_ARRAY)
         );
     
-    if ($debug) { echo "\nParams geparsed: "; print_r ($params); echo "\n\n";}    
+    $jsonoutput = '';
         
-    switch (filter_input(INPUT_GET, 'f')) {        
+    $command = filter_input(INPUT_GET, 'f') ;
+    switch ( $command ) 
+    {        
         case "MSchedule":
             $getParams = filter_input_array(INPUT_GET, $params);            
+				    if ($debug) { echo "\nParams geparsed: "; print_r ($getParams); echo "\n\n";}    
+
             $response = $client->getMergedSchedule($getParams['stg'], $getParams['sem'], $getParams['tt'], $getParams['id']);
-            print_r(getJSON($response));
+            $jsonoutput = (getJSON($response));
             break;
         case "Schedule":                
             $getParams = filter_input_array(INPUT_GET, $params);            //           
 				    if ($debug) { echo "\nParams geparsed: "; print_r ($getParams); echo "\n\n";}    
           
             $response = $client->getSchedule($getParams['stg'], $getParams['sem'], $getParams['tt'], $getParams['id']);
-            print_r(getJSON($response));
+            $jsonoutput = (getJSON($response));
             break;
         
         case "MySchedule":                
             $getParams = filter_input_array(INPUT_GET, array('id'=>array('filter' => FILTER_VALIDATE_INT,'flags'  => FILTER_REQUIRE_ARRAY,)));         
+				    if ($debug) { echo "\nParams geparsed: "; print_r ($getParams); echo "\n\n";}    
+
             $response = $client->getMySchedule($getParams['id']);
-            print_r(getJSON($response));
+            $jsonoutput = (getJSON($response));
             break;
             
         case "Courses":
             $getParams = filter_input_array(INPUT_GET, array('tt' => FILTER_SANITIZE_STRING));            
+				    if ($debug) { echo "\nParams geparsed: "; print_r ($getParams); echo "\n\n";}    
+
             $response = $client->getCourses($getParams['tt']);
-            print_r(getJSON($response));
+            $jsonoutput = (getJSON($response));
             break;    
         
         case "Changes":
             $getParams = filter_input_array(INPUT_GET, $params);                      
+				    if ($debug) { echo "\nParams geparsed: "; print_r ($getParams); echo "\n\n";}    
+
             $response = $client->getChanges($getParams['stg'], $getParams['sem'], $getParams['tt'], $getParams['id']);
-            print_r(getJSON($response));
+            $jsonoutput = (getJSON($response));
             break;
                 
 /*
  *  Mensa deaktiviert!
         case "Menu":
             $response = $client->getMenu();
+            $jsonoutput = ...
             break;   
  * 
  */
 
         default:
             header('Content-Type: text/html');
-            echo utf8_decode("Not a valid function <br />\n");
-// #### hk entfernt damit die Dokumentation nicht angezeigt wird
-// ####            include './docs.php';
+						// #### hk die Dokumentation soll nur bei Debug angezeigt werden
+            if ($debug) { include './docs.php'; }
+            echo ("Not a valid function: ".$command." <br />\n");
             break;                
     }    
-} catch (Exception $e) {
-    echo "\nCaught exception: ", $e->getMessage(), "\n";
-	// TODO Mehr Information wieder entfernen!
+    
+    /* nach dem Ende des Switches */
+    if ( !empty( $jsonoutput ) )
+    {
+    	// Ausgabe der Parameter
+    	print_r ( $jsonoutput ) ;
+    }
+    if ( $debug ) { echo "\nDEBUG: response: ".$response."\n\n";
+    								echo "\nDEBUG: jsonoutput: ".$jsonoutput."\n\n"; }
+    
+    
+} catch (Exception $e) 
+{
+	echo "\nCaught exception: ", $e->getMessage(), "\n";
+	echo "\nResponse: ", $response, "\n";
 	echo "\n\n\nMore Information: ", var_dump($e), "\n";
 }
 
