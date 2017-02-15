@@ -63,10 +63,30 @@ function getCourses($tt){
     $param_where = array("(sp.WS_SS=:tt)");
     $param_orderby=array("sg.Bezeichnung");
     
-    $sql = "SELECT DISTINCT ".implode(' , ', $param_select).
-            " FROM Stundenplan_WWW AS sp INNER JOIN Studiengaenge  AS sg ON sg.STGNR = sp.STGNR "
-            . " WHERE ".implode(' AND ', $param_where).
-            " ORDER BY ".implode(' , ', $param_orderby);
+    $sql = "SELECT DISTINCT ".implode(' , ', $param_select)
+            ." FROM Stundenplan_WWW AS sp INNER JOIN Studiengaenge  AS sg ON sg.STGNR = sp.STGNR "
+            ." WHERE ".implode(' AND ', $param_where)
+            ." ORDER BY ".implode(' , ', $param_orderby);
+
+/*
+    $sql = "SELECT DISTINCT sg.Bezeichnung, sg.Bezeichnung_en, sg.STGNR, sp.Fachsemester, sp.Jahr
+            FROM Stundenplan_WWW AS sp INNER JOIN Studiengaenge  AS sg ON sg.STGNR = sp.STGNR 
+            WHERE (sp.WS_SS='SS')
+            ORDER BY sg.Bezeichnung;"
+    
+			Bezeichnung Bezeichnung_en STGNR Fachsemester Jahr
+			Berufsbegleitender Bachelor Betriebswirtschaft Business Administration (part-time) BBB 6 2017
+			Berufsbegleitender Bachelor Betriebswirtschaft Business Administration (part-time) BBB 8 2017
+			Berufsbegleitender Bachelor Betriebswirtschaft SP ...                              BBB I 2 2017
+			Berufsbegleitender Bachelor Betriebswirtschaft SP ... BBB I 4 2017
+			Betriebswirtschaft Business Administration BW 6 2017
+			Betriebswirtschaft Business Administration BW 7 2017
+			Betriebswirtschaft Business Administration BW 3 2017
+			Betriebswirtschaft Business Administration BW 4a 2017
+			Betriebswirtschaft Business Administration BW 4b 2017
+			Betriebswirtschaft Business Administration BW 1 2017
+
+*/		
 
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':tt', $tt);
@@ -74,13 +94,16 @@ function getCourses($tt){
     
     $result = array();
     $arrSemester = array();
-    while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {      
-        if(!array_key_exists($row['STGNR'], $arrSemester)){
-            $result[]=new Course($row["STGNR"], $row["Jahr"],$row["Bezeichnung"], $row["Bezeichnung_en"]);
+    while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) 
+    {      
+        if( !array_key_exists($row['STGNR'], $arrSemester))
+        {
+            $result[] = new Course( $row["STGNR"], $row["Jahr"], $row["Bezeichnung"], $row["Bezeichnung_en"]);
         }
-        $arrSemester[$row['STGNR']][]=$row["Fachsemester"];
+        $arrSemester[$row['STGNR']][] = $row["Fachsemester"];
     }
-    foreach ($result as $course) {
+    foreach ($result as $course) 
+    {
         $semester = $arrSemester[$course->course];
         sort($semester ,SORT_NUMERIC );
         $course->addSemester($semester);
