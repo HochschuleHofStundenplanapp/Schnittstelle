@@ -14,12 +14,45 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
+
+
+/* we can request debug output to better find errors */
+$debug=0;
+if ( isset( $_REQUEST['debug'] ))
+{
+	$debug=1;
+	mysqli_report(MYSQLI_REPORT_ALL);
+
+	ini_set('mysql.trace_mode',  'On' );
+	ini_set('mysqli.trace_mode',  'On' );
+
+	ini_set('error_reporting', E_ALL | E_STRICT | E_DEPRECATED | E_NOTICE );
+
+	ini_set('display_errors', 'On' );
+	ini_set('display_startup_errors', 'On' ) ;
+
+	//ini_set('allow_call_time_pass_reference', 'On' );
+	ini_set('html_errors', 'On' ) ;
+	
+	ini_set('mysql.log_queries_not_using_indexes','on');
+	ini_set('mysql.log_slow_admin_statements','on');
+	ini_set('mysql.slow_query_log','on');
+	ini_set('mysql.log_error_verbosity','3');
+
+	ini_set('mysqli.log_queries_not_using_indexes','on');
+	ini_set('mysqli.log_slow_admin_statements','on');
+	ini_set('mysqli.slow_query_log','on');
+	ini_set('mysqli.log_error_verbosity','3');
+}
+
+
+
 // SoapClient
 try {
     $options = array(
-#        "location" => "http://localhost/soap/server.php",
+//        "location" => "http://localhost/soap/server.php",
         "location" => "https://app.hof-university.de/soap/server.php",
-#        "uri" => "http://localhost/soap/",
+//        "uri" => "http://localhost/soap/",
         "uri" => "https://app.hof-university.de/soap/",
         'encoding' => 'UTF-8',
 //        'encoding' => 'ISO-8859-15',
@@ -46,6 +79,9 @@ try {
         'tt' => FILTER_SANITIZE_STRING,
         'id'=>array('filter' => FILTER_VALIDATE_INT,'flags'  => FILTER_REQUIRE_ARRAY)
         );
+    
+    if ($debug) { echo "\nParams geparsed: "; print_r ($params); echo "\n\n";}    
+        
     switch (filter_input(INPUT_GET, 'f')) {        
         case "MSchedule":
             $getParams = filter_input_array(INPUT_GET, $params);            
@@ -54,6 +90,8 @@ try {
             break;
         case "Schedule":                
             $getParams = filter_input_array(INPUT_GET, $params);            //           
+				    if ($debug) { echo "\nParams geparsed: "; print_r ($getParams); echo "\n\n";}    
+          
             $response = $client->getSchedule($getParams['stg'], $getParams['sem'], $getParams['tt'], $getParams['id']);
             print_r(getJSON($response));
             break;
@@ -92,13 +130,13 @@ try {
             break;                
     }    
 } catch (Exception $e) {
-    echo "Caught exception: ", $e->getMessage(), "\n";
+    echo "\nCaught exception: ", $e->getMessage(), "\n";
 	// TODO Mehr Information wieder entfernen!
-	echo "\nMore Information: ", var_dump($e), "\n";
+	echo "\n\n\nMore Information: ", var_dump($e), "\n";
 }
 
 /**
- * Fügt die nötigen Headerinformationen hinzu und erzeugt JSON-Objekt
+ * Fuegt die noetigen Headerinformationen hinzu und erzeugt JSON-Objekt
  * @param type $obj Array welches als JSON codiert werden soll
  * @return type JSON-Objekt
  */
