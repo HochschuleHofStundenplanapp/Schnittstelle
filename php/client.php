@@ -15,6 +15,14 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
+/*
+
+Testlinks:
+
+https://app.hof-university.de/soap/client.php?f=Schedule&stg=mc&sem=6&tt=SS&debug=1
+https://app.hof-university.de/soap/client.php?f=MySchedule&debug=1&id[]=DigM§aheda_2%50468 $ 2
+
+*/
 
 /* we can request debug output to better find errors */
 $debug=0;
@@ -83,7 +91,7 @@ try {
         'stg' => FILTER_SANITIZE_STRING,
         'sem' => FILTER_SANITIZE_ENCODED,
         'tt' => FILTER_SANITIZE_STRING,
-        'id'=>array('filter' => FILTER_VALIDATE_INT,'flags'  => FILTER_REQUIRE_ARRAY)
+        'id'=>array('filter' => FILTER_VALIDATE_STRING,'flags'  => FILTER_REQUIRE_ARRAY)
         );
     
     $jsonoutput = '';
@@ -153,7 +161,7 @@ try {
     	// Ausgabe der Parameter
     	print_r ( $jsonoutput ) ;
     }
-    if ( $debug ) { echo "\nDEBUG: response: ".$response."\n\n";
+    if ( $debug ) { echo "\nDEBUG: response: "; print_r ($response); echo "\n\n";
     								echo "\nDEBUG: jsonoutput: ".$jsonoutput."\n\n"; }
     
     
