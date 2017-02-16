@@ -1,2 +1,3 @@
 Datei von Home Verzeichnis im soap Verzeichnis ersetzen:
 sudo cp fcm_register_user.php /var/www/html/soap/fcm_register_user.php
+sudo cp client.php /var/www/html/soap/client.php

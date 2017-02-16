@@ -91,7 +91,7 @@ try {
         'stg' => FILTER_SANITIZE_STRING,
         'sem' => FILTER_SANITIZE_ENCODED,
         'tt' => FILTER_SANITIZE_STRING,
-        'id'=>array('filter' => FILTER_VALIDATE_STRING,'flags'  => FILTER_REQUIRE_ARRAY)
+        'id' => array('filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_REQUIRE_ARRAY)
         );
     
     $jsonoutput = '';
@@ -115,7 +115,7 @@ try {
             break;
         
         case "MySchedule":                
-            $getParams = filter_input_array(INPUT_GET, array('id'=>array('filter' => FILTER_VALIDATE_INT,'flags'  => FILTER_REQUIRE_ARRAY,)));         
+            $getParams = filter_input_array(INPUT_GET, array('id' => array('filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_REQUIRE_ARRAY,)));         
 				    if ($debug) { echo "\nParams geparsed: "; print_r ($getParams); echo "\n\n";}    
 
             $response = $client->getMySchedule($getParams['id']);
