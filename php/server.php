@@ -185,10 +185,6 @@ function getMySchedule($id)
     {
 	    require_once 'connect_db.php';
 	
-// TODO Testausgabe entfernen
-//var_dump $id;
-//print_r $id;
-	
     $param_select = array(
         "sp.id",
         "sp.Bezeichnung label",
@@ -203,7 +199,7 @@ function getMySchedule($id)
         "sp.RaumNr room",
         "sp.SplusName splusname",
         "sp.Kommentar comment");
-    $param_where = array( "sp.SplusName IN (".implode(",",$id).")");
+    $param_where = array( "sp.SplusName IN ('".implode("','", $id)."')");
     $param_orderby=array("sp.Tag_Nr", "starttime");
 
     

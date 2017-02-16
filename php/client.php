@@ -20,7 +20,7 @@
 Testlinks:
 
 https://app.hof-university.de/soap/client.php?f=Schedule&stg=mc&sem=6&tt=SS&debug=1
-https://app.hof-university.de/soap/client.php?f=MySchedule&debug=1&id[]=DigM§aheda_2%50468 $ 2
+https://app.hof-university.de/soap/client.php?f=MySchedule&id[]=DigM%C2%A7aheda_2%2550468%20%24%202&debug=1
 
 */
 
@@ -116,7 +116,8 @@ try {
         
         case "MySchedule":                
             $getParams = filter_input_array(INPUT_GET, array('id' => array('filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_REQUIRE_ARRAY,)));         
-				    if ($debug) { echo "\nParams geparsed: "; print_r ($getParams); echo "\n\n";}    
+			if ($debug) { echo "\nParams geparsed: "; print_r ($getParams); echo "\n";}
+			if ($debug) { print_r ("'".implode("','", $getParams['id'])."'"); echo "\n\n";}
 
             $response = $client->getMySchedule($getParams['id']);
             $jsonoutput = (getJSON($response));
