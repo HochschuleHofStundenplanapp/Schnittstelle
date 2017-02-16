@@ -146,7 +146,7 @@ function getSchedule($stgnr, $semester, $tt, $id){
 	    if( !empty($id) )
 	    {
 	    		// überschreiben des Parameters
-	        array_push($param_where, "sp.SplusName IN (".implode("," , $id ). ")");
+	        array_push($param_where, "sp.SplusName IN ('".implode("','", $id)."')");
 	    }
     
 			$sql = "SELECT ".implode(' , ', $param_select)
@@ -199,7 +199,7 @@ function getMySchedule($id)
         "sp.RaumNr room",
         "sp.SplusName splusname",
         "sp.Kommentar comment");
-    $param_where = array( "sp.SplusName IN ('".implode("','", $id)."')");
+    $param_where = array("sp.SplusName IN ('".implode("','", $id)."')");
     $param_orderby=array("sp.Tag_Nr", "starttime");
 
     
@@ -247,7 +247,7 @@ function getMergedSchedule($stgnr, $semester, $tt, $id) {
     $param_where = array("(sg.STGNR = :stgnr)","(sp.Fachsemester = :semester)", "(sp.WS_SS = :tt)");
     $param_orderby=array("sp.Tag_Nr", "starttime");     
     if(!empty($id)){
-        array_push($param_where, "sp.SplusName IN (".implode(",",$id).")");
+        array_push($param_where, "sp.SplusName IN ('".implode("','", $id)."')");
     }
     $sql = "SELECT ".implode(' , ', $param_select).
             " FROM Stundenplan_WWW AS sp INNER JOIN Studiengaenge AS sg ON sg.STGNR = sp.STGNR "
@@ -345,13 +345,11 @@ function getChanges($stgnr, $semester, $tt, $id) {
 		if(!empty($stgnr) && !empty($semester) && !empty($tt)){
 			$param_where = array("(v.STGNR = :stgnr)","(s.STGNR = :stgnr)","(v.Fachsemester = :semester)","(s.Fachsemester = :semester)","((DATEDIFF(DATE(v.Ausfalldatum),NOW()) >= 0) OR (DATEDIFF(DATE(v.Ersatzdatum),NOW()) >= 0))", "(s.WS_SS = :tt)");
 			if(!empty($id)){
-				// TODO SUBSTRING von s.SplusName um den hinteren Teil zu entfernen
-				array_push($param_where, "s.SplusName IN (".implode(",",$id).")");
+				array_push($param_where, "s.SplusName IN ('".implode("','", $id)."')");
 			}
 		} else {
 			// ids sind nicht leer
-			// TODO SUBSTRING von s.SplusName um den hinteren Teil zu entfernen
-			$param_where = array("s.SplusName IN (".implode(",",$id).")","((DATEDIFF(DATE(v.Ausfalldatum),NOW()) >= 0) OR (DATEDIFF(DATE(v.Ersatzdatum),NOW()) >= 0))");
+			$param_where = array("s.SplusName IN ('".implode("','", $id)."')","((DATEDIFF(DATE(v.Ausfalldatum),NOW()) >= 0) OR (DATEDIFF(DATE(v.Ersatzdatum),NOW()) >= 0))");
 		}
 		
 		$param_orderby=array("ausfalldatum", "ausfallzeit");
