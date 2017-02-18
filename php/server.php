@@ -18,7 +18,7 @@
 //require_once './mensa.php';        //Mensa deaktiviert!
 require_once './classes.php';
 
-const __VERSIONNUMBER = 3.2;
+const __VERSIONNUMBER = 3.3;
 
 $server = new SoapServer(
         null, array(                    //Parameter	Bedeutung                       Priorität
