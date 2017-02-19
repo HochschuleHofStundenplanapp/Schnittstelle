@@ -39,7 +39,7 @@ for ($i=0; $i < count($vorlesung_ids); $i++) {
 	//Alle verlegung_id's werden auslesen
 	echo"<br><h3>verlegung_ids:</h3>";
 	for ($j = 0; $j < $countChanges; $j++) {
-		$verlegung_id = $response['changes'][$j]['id'];
+		$verlegung_id = $response['changes'][$j]['splusname'];
 		echo "<h4>Id: ";
 		echo $verlegung_id;
 		echo "</h4>";
