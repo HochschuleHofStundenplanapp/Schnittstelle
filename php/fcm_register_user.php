@@ -5,8 +5,11 @@
 Testlinks:
 
 https://app.hof-university.de/soap/fcm_register_user.php?debug=1
-
-
+muss allerdings mit einem Tool wie z.B. Advanced Rest Client
+https://chrome.google.com/webstore/detail/advanced-rest-client/hgmloofddffdnphfgcellkdfbfbjeloo
+per POST aufgerufen werden und die folgende Variablen mit übergeben werden:
+- token (Der Token des Gerätes, zum testen einfach einen String)
+- id (die SplusName's der Vorlesungen, zum testen auch einfach einen oder mehere Strings)
 
 */
 
