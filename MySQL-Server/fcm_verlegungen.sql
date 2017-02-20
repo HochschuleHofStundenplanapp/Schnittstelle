@@ -6,7 +6,7 @@ CREATE TABLE `fcm_verlegungen` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `verlegung_id` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
   `vorlesung_id` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL
-) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Indizes für die Tabelle `fcm_verlegungen`
