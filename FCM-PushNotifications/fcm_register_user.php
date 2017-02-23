@@ -71,9 +71,10 @@ mysqli_query($con,$sqldelete);
 for ($i = 0; $i < count($lectureArray); $i++) 
 {
 	// htmlentities wegen SQL-Injection
-	$vorlesung_id = htmlentities ( $lectureArray[$i]['vorlesung_id'] );
+	// da htmlentities falsch encodet filter_var genommen
+	$vorlesung_id = filter_var($lectureArray[$i]['vorlesung_id'], FILTER_SANITIZE_STRING);
 	if ($debug) { echo "\nVorlesung_id: $vorlesung_id\n";}
-	$sqlinsert = "INSERT INTO `fcm_nutzer`(`token`, `vorlesung_id`) VALUES (\"$fcm_token\",\"$vorlesung_id\")";
+	$sqlinsert = "INSERT INTO `fcm_nutzer`(`token`, `vorlesung_id`) VALUES (\"$fcm_token\",N'$vorlesung_id')";
 	mysqli_query($con,$sqlinsert);
 }
 
