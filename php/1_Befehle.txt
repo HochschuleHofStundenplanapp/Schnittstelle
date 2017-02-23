@@ -5,3 +5,6 @@ sudo cp server.php /var/www/html/soap/server.php
 
 sudo cp fcm_register_user.php /var/www/html/soap/fcm_register_user.php
 sudo cp fcm_update_and_send.php /var/www/html/soap/fcm_update_and_send.php
+
+Permission ändern:
+sudo chmod 740 /var/www/html/soap/fcm_update_and_send.php

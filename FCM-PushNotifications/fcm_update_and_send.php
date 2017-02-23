@@ -36,7 +36,7 @@ for ($i=0; $i < count($vorlesung_ids); $i++) {
 		echo "Für die vorlesungs_id <b>".$vorlesung_ids[$i]."</b> liegen <b>KEINE</b> Änderungen vor!";
 	}
 
-	//Alle verlegung_id's werden auslesen
+	//Alle verlegung_id's werden ausgelesen
 	echo"<br><h3>verlegung_ids:</h3>";
 	for ($j = 0; $j < $countChanges; $j++) {
 		$verlegung_id = $response['changes'][$j]['splusname'];
