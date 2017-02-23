@@ -16,7 +16,7 @@
   */
 
 //require_once './mensa.php';        //Mensa deaktiviert!
-require_once './classes.php';
+require_once 'classes.php';
 
 const __VERSIONNUMBER = 3.3;
 

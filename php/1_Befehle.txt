@@ -8,3 +8,6 @@ sudo cp fcm_update_and_send.php /var/www/html/soap/fcm_update_and_send.php
 
 Permission ändern:
 sudo chmod 740 /var/www/html/soap/fcm_update_and_send.php
+
+Befehl um FCM Update Script testweiße aufzurufen:
+sudo php /var/www/html/soap/fcm_update_and_send.php

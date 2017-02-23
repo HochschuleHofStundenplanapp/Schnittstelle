@@ -18,22 +18,22 @@ if($mySQLresult->num_rows >0){
 	}
 }
 
-echo "<br>Es wurden <b>".count($vorlesung_ids)." </b>vorlesungs_ids durchsucht!<br>";
+echo "<br>Es wurden <b>".count($vorlesung_ids)." </b>vorlesungs_ids durchsucht!<br>\n";
 
 //Es werden zu jeder vorlesung_id die verlegung_id's geholt
 for ($i=0; $i < count($vorlesung_ids); $i++) { 
 	$response = getChanges("","","",array($vorlesung_ids[$i]));
 	$countChanges = count($response['changes']);
 
-	echo "-------------------------------------------<br>";
+	echo "-------------------------------------------<br>\n";
 
 	echo "<br>";
 	if($countChanges > 0){
-		echo "Für die vorlesungs_id <b>".$vorlesung_ids[$i]." </b>liegen <b>$countChanges</b> Änderungen vor!";
+		echo "Für die vorlesungs_id <b>".$vorlesung_ids[$i]." </b>liegen <b>$countChanges</b> Änderungen vor!\n";
 		//var_dump($response);
 	}
 	else{
-		echo "Für die vorlesungs_id <b>".$vorlesung_ids[$i]."</b> liegen <b>KEINE</b> Änderungen vor!";
+		echo "Für die vorlesungs_id <b>".$vorlesung_ids[$i]."</b> liegen <b>KEINE</b> Änderungen vor!\n";
 	}
 
 	//Alle verlegung_id's werden ausgelesen
