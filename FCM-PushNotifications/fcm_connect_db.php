@@ -1,14 +1,22 @@
 <?php
 
 $host = "localhost";
+$db_name = "t3_ext";
 $db_user = "fcmuser";
 $db_password = "Wer9%GreitY100#";
-$db_name = "t3_ext";
 
-$con = mysqli_connect($host,$db_user,$db_password,$db_name);
-if($con)
-    echo "Connection Success....<br></>";
-else
-    echo "Connection Error....<br></>";
+$con = new mysqli($host,$db_user,$db_password,$db_name);
+
+/* check connection */
+if (mysqli_connect_errno()) {
+    printf("Connect failed: %s\n", mysqli_connect_error());
+    exit();
+}
+
+/* change character set to utf8 */
+if (!$con->set_charset("utf8")) {
+	printf("Error loading character set utf8: %s\n", $mysqli->error);
+	exit();
+}
 
 ?>
