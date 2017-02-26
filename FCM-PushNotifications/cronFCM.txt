@@ -1,5 +1,5 @@
-# Die Cron-Befehle die mit "sudo crontab -e" zu der Cron-Tabelle hinzugefügt werden müssen.
-# Die Zeiten sind so gewählt das immer 10 Minuten vor Vorlesung-Beginn das Script ausgeführt wird. Das ist einmal weniger als alle 15 Minuten
+# Die Cronjob-Befehle die mit "crontab -e" zu der Crontab hinzugefügt werden müssen:
+# (Die Zeiten sind so gewählt das immer 10 Minuten vor Vorlesung-Beginn das Script ausgeführt wird)
 20 * * * *   /var/www/html/soap/fcm_update_and_send.php > /home/mstepping/logs/cronFCM.log 2>&1
 35 * * * *   /var/www/html/soap/fcm_update_and_send.php > /home/mstepping/logs/cronFCM.log 2>&1
 50 * * * *   /var/www/html/soap/fcm_update_and_send.php > /home/mstepping/logs/cronFCM.log 2>&1
