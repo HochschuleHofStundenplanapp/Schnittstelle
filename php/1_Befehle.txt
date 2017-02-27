@@ -6,7 +6,7 @@ sudo cp fcm_register_user.php /var/www/html/soap/fcm_register_user.php
 sudo cp fcm_update_and_send.php /var/www/html/soap/fcm_update_and_send.php
 
 sudo cp clear_fcm_Nutzer.php /var/www/html/soap/clear_fcm_Nutzer.php
-sudo cp clear_fcm_Nutzer.php /var/www/html/soap/fcm_connect_db.php
+sudo cp fcm_connect_db.php /var/www/html/soap/fcm_connect_db.php
 
 
 Andere Befehle:
