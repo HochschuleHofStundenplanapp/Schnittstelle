@@ -4,7 +4,7 @@ require "fcm_connect_db.php";
 require "server.php";
 
 $sql = "SELECT vorlesung_id FROM fcm_nutzer GROUP BY vorlesung_id";
-$mySQLresult = mysqli_query($con, $sql);
+$mySQLresult = $con->query($sql);
 $vorlesung_ids = array();
 
 //Vorlesungs_ids werden in vorlesung_ids Array gespeichert 
@@ -17,6 +17,7 @@ if($mySQLresult->num_rows >0) {
 		array_push($vorlesung_ids, $row['vorlesung_id']);
 	}
 }
+$mySQLresult->close();
 
 echo "Es wurden ".count($vorlesung_ids)." vorlesungs_ids durchsucht!\n";
 
@@ -45,28 +46,30 @@ for ($i=0; $i < count($vorlesung_ids); $i++) {
 		
 		//Überprüfen, ob Päärchen aus vorlesung_id und verlegung_id in fcm_verlegungen schon vorkommt, falls nein -> reinschreiben
 		$sql2 = "SELECT * FROM fcm_verlegungen WHERE verlegung_id = $verlegung_id AND vorlesung_id = $vorlesung_ids[$i]";
-		$mySQLresult2 = mysqli_query($con, $sql2);
+		$mySQLresult2 = $con->query($sql2);
 		if($mySQLresult2->num_rows >0){
 			echo "id wurde bereits eingetragen!\n";
 		}
 		else{
 			echo "id wird eingetragen!\n";
 			$sqlinsert = "INSERT INTO fcm_verlegungen (`id`, `verlegung_id`, `vorlesung_id`, `benachrichtigt`) VALUES (NULL, '$verlegung_id', '$vorlesung_ids[$i]', '0')";
-			mysqli_query($con, $sqlinsert);
+			$con->query($sqlinsert);
 			//Sende Notifications an vorlesungs_id
 			sendNotification($vorlesung_ids[$i], $con);
 		}
+		$mySQLresult2->close();
 		echo "<br>\n";
 	}
 }
 
+// SQLi-Conncetion schließen
 $con->close();
 
 // Funktionen
 // --------------------------------------------------------------------------------
 function sendNotification($vorlesung_id, $con) {
 	$sql3 = "SELECT token FROM fcm_nutzer WHERE vorlesung_id = '".$vorlesung_id."'";
-	$mySQLresult3 = mysqli_query($con, $sql3);
+	$mySQLresult3 = $con->query($sql3);
 	$tokenArray = array("");
 
 	//Alle Tokens auslesen und in $tokens speichern
@@ -89,10 +92,10 @@ function sendNotification($vorlesung_id, $con) {
 			echo($tokenArray[$i]."<br>");
 		}
 		echo "Notification an Vorlesung_id $vorlesung_id wurde gesendet!<br>\n";
-	}
-	else{
+	} else{
 	    echo "Es sind keine Tokens für die vorlesungs_id <b>$vorlesung_id</b> vorhanden!<br>\n";
 	}
+	$mySQLresult3->close();
 }
 
 //SendGoogleCloudMessage

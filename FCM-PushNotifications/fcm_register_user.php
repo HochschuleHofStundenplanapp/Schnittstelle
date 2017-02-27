@@ -65,7 +65,7 @@ if ($debug) { echo "\nToken: $fcm_token\n\nlectureJSON: $lectureJSON\n";}
 
 //Alle Einträge mit diesem Token in DB löschen
 $sqldelete = "DELETE FROM fcm_nutzer WHERE token = \"$fcm_token\" ";
-mysqli_query($con,$sqldelete);
+$con->query($sqldelete);
 
 //Tokens und Vorlesungn in DB eintragen
 for ($i = 0; $i < count($lectureArray); $i++) 
@@ -75,9 +75,10 @@ for ($i = 0; $i < count($lectureArray); $i++)
 	$vorlesung_id = filter_var($lectureArray[$i]['vorlesung_id'], FILTER_SANITIZE_STRING);
 	if ($debug) { echo "\nVorlesung_id: $vorlesung_id\n";}
 	$sqlinsert = "INSERT INTO `fcm_nutzer`(`token`, `vorlesung_id`) VALUES (\"$fcm_token\",N'$vorlesung_id')";
-	mysqli_query($con,$sqlinsert);
+	$con->query($sqlinsert);
 }
 
+// SQLi-Conncetion schließen
 $con->close();
 
 return("Funktioniert!");
