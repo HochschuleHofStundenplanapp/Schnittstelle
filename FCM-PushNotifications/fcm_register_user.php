@@ -78,7 +78,7 @@ for ($i = 0; $i < count($lectureArray); $i++)
 	mysqli_query($con,$sqlinsert);
 }
 
-mysqli_close($con);
+$con->close();
 
 return("Funktioniert!");
 ?>
