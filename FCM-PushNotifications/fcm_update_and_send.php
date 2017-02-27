@@ -60,6 +60,10 @@ for ($i=0; $i < count($vorlesung_ids); $i++) {
 	}
 }
 
+mysqli_close($con);
+
+// Funktionen
+// --------------------------------------------------------------------------------
 function sendNotification($vorlesung_id, $con) {
 	$sql3 = "SELECT token FROM fcm_nutzer WHERE vorlesung_id = '".$vorlesung_id."'";
 	$mySQLresult3 = mysqli_query($con, $sql3);
