@@ -1,5 +1,7 @@
 # Die Cronjob-Befehle die mit "crontab -e" zu der Crontab hinzugefügt werden müssen:
 # (Die Zeiten sind so gewählt das immer 10 Minuten vor Vorlesung-Beginn das Script ausgeführt wird)
-20 * * * *   cronFCMUpdate.sh > /home/mstepping/logs/cronFCM.log 2>&1
-35 * * * *   cronFCMUpdate.sh > /home/mstepping/logs/cronFCM.log 2>&1
-50 * * * *   cronFCMUpdate.sh > /home/mstepping/logs/cronFCM.log 2>&1
+20	*	*	*	*	/var/www/soap/cronFCMUpdate.sh > /home/mstepping/logs/cronFCM.log 2>&1
+35	*	*	*	*	/var/www/soap/cronFCMUpdate.sh > /home/mstepping/logs/cronFCM.log 2>&1
+50	*	*	*	*	/var/www/soap/cronFCMUpdate.sh > /home/mstepping/logs/cronFCM.log 2>&1
+
+# Beim zweiten * könnte man auch 5-0 machen damit nachts keine Benachrichtigungen gesendet werden

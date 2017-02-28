@@ -28,3 +28,6 @@ sudo php /var/www/html/soap/clear_fcm_nutzer.php
 
 Befehl um die fcm_verlegungen Tabelle zu leeren, damit neue Benachrichtigungen geschickt werden:
 sudo php /var/www/html/soap/clear_fcm_verlegungen.php
+
+Befehl um die Crontab des www-data Users zu bearbeiten
+sudo crontab -e -u www-data
