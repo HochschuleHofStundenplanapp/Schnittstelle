@@ -45,20 +45,20 @@ for ($i=0; $i < count($vorlesung_ids); $i++) {
 		echo "\n";
 		
 		//Überprüfen, ob Päärchen aus vorlesung_id und verlegung_id in fcm_verlegungen schon vorkommt, falls nein -> reinschreiben
-		$sql2 = "SELECT * FROM fcm_verlegungen WHERE verlegung_id = $verlegung_id AND vorlesung_id = $vorlesung_ids[$i]";
+		$sql2 = "SELECT * FROM fcm_verlegungen WHERE verlegung_id = '$verlegung_id' AND vorlesung_id = '$vorlesung_ids[$i]'";
 		$mySQLresult2 = $con->query($sql2);
-		if($mySQLresult2->num_rows >0){
+		if ($mySQLresult2->num_rows >0) {
 			echo "id wurde bereits eingetragen!\n";
 		}
-		else{
+		else {
 			echo "id wird eingetragen!\n";
-			$sqlinsert = "INSERT INTO fcm_verlegungen (`id`, `verlegung_id`, `vorlesung_id`, `benachrichtigt`) VALUES (NULL, '$verlegung_id', '$vorlesung_ids[$i]', '0')";
+			$sqlinsert = "INSERT INTO fcm_verlegungen (`verlegung_id`, `vorlesung_id`) VALUES ('$verlegung_id', '$vorlesung_ids[$i]')";
 			$con->query($sqlinsert);
 			//Sende Notifications an vorlesungs_id
-			sendNotification($vorlesung_ids[$i], $con);
+			sendNotification($vorlesung_ids[$i], $con, $response['changes'][$j]['label']);
 		}
 		$mySQLresult2->close();
-		echo "<br>\n";
+		echo "\n";
 	}
 }
 
@@ -67,7 +67,7 @@ $con->close();
 
 // Funktionen
 // --------------------------------------------------------------------------------
-function sendNotification($vorlesung_id, $con) {
+function sendNotification($vorlesung_id, $con, $label) {
 	$sql3 = "SELECT token FROM fcm_nutzer WHERE vorlesung_id = '".$vorlesung_id."'";
 	$mySQLresult3 = $con->query($sql3);
 	$tokenArray = array("");
@@ -88,7 +88,7 @@ function sendNotification($vorlesung_id, $con) {
 		
 		//Nachricht senden mit jedem Token aufrufen
 		for($i=0; $i < count($tokenArray); $i++) {
-			sendGCM($tokenArray[$i]);
+			sendGCM($tokenArray[$i], $label);
 			echo($tokenArray[$i]."<br>");
 		}
 		echo "Notification an Vorlesung_id $vorlesung_id wurde gesendet!<br>\n";
@@ -99,10 +99,10 @@ function sendNotification($vorlesung_id, $con) {
 }
 
 //SendGoogleCloudMessage
-function sendGCM($registration_ids) {
+function sendGCM($registration_ids, $label) {
     //titel und message der Notification
-    $title =    "title";
-    $message =  "message";
+    $title =    "Neue Änderung";
+    $message =  "für das Fach ".$label;
 
     //FCM URL
     $url = "https://fcm.googleapis.com/fcm/send";

@@ -2,11 +2,12 @@ Datei vom "newphp"-Verzeichnis im soap Verzeichnis ersetzen:
 sudo cp client.php /var/www/html/soap/client.php
 sudo cp server.php /var/www/html/soap/server.php
 
+sudo cp fcm_connect_db.php /var/www/html/soap/fcm_connect_db.php
 sudo cp fcm_register_user.php /var/www/html/soap/fcm_register_user.php
 sudo cp fcm_update_and_send.php /var/www/html/soap/fcm_update_and_send.php
 
-sudo cp clear_fcm_Nutzer.php /var/www/html/soap/clear_fcm_Nutzer.php
-sudo cp fcm_connect_db.php /var/www/html/soap/fcm_connect_db.php
+sudo cp clear_fcm_nutzer.php /var/www/html/soap/clear_fcm_nutzer.php
+sudo cp clear_fcm_verlegungen.php /var/www/html/soap/clear_fcm_verlegungen.php
 
 
 Andere Befehle:
@@ -15,8 +16,15 @@ Andere Befehle:
 Permission ändern:
 sudo chmod 740 /var/www/html/soap/fcm_update_and_send.php
 
+
+FCM Befehle:
+----------------------------------------------------------------------
+
 Befehl um FCM Update Script testweiße aufzurufen:
 sudo php /var/www/html/soap/fcm_update_and_send.php
 
 Befehl um die fcm_nutzer Tabelle zu leeren:
-sudo php /var/www/html/soap/clear_fcm_Nutzer.php
+sudo php /var/www/html/soap/clear_fcm_nutzer.php
+
+Befehl um die fcm_verlegungen Tabelle zu leeren, damit neue Benachrichtigungen geschickt werden:
+sudo php /var/www/html/soap/clear_fcm_verlegungen.php
