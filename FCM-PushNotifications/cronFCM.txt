@@ -4,4 +4,4 @@
 35	*	*	*	*	/var/www/soap/cronFCMUpdate.sh > /home/mstepping/logs/cronFCM.log 2>&1
 50	*	*	*	*	/var/www/soap/cronFCMUpdate.sh > /home/mstepping/logs/cronFCM.log 2>&1
 
-# Beim zweiten * könnte man auch 5-0 machen damit nachts keine Benachrichtigungen gesendet werden
+# Ersten * durch 5-0 ersetzen damit nachts keine Benachrichtigungen gesendet werden.

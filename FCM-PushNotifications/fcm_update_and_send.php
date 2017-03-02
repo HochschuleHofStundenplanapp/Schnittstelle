@@ -112,7 +112,8 @@ function sendGCM($registration_ids, $label) {
     //prepare data
     $fields = array (
         'registration_ids' => array($registration_ids),
-        'notification' => array('title' => $title, 'body' => $message)
+		'data' => array('notification_type' => 'change'),
+        'notification' => array('title' => $title, 'body' => $message, 'sound' => 'default')
     );
 
     $fields = json_encode ( $fields ); 
