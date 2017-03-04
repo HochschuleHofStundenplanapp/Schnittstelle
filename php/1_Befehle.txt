@@ -1,4 +1,5 @@
 Datei vom "newphp"-Verzeichnis im soap Verzeichnis ersetzen:
+sudo cp /home/mstepping/newphp/connect_db.php /var/www/html/soap/connect_db.php
 sudo cp /home/mstepping/newphp/client.php /var/www/html/soap/client.php
 sudo cp /home/mstepping/newphp/server.php /var/www/html/soap/server.php
 
@@ -8,6 +9,8 @@ sudo cp /home/mstepping/newphp/fcm_update_and_send.php /var/www/html/soap/fcm_up
 
 sudo cp /home/mstepping/newphp/clear_fcm_nutzer.php /var/www/html/soap/clear_fcm_nutzer.php
 sudo cp /home/mstepping/newphp/clear_fcm_verlegungen.php /var/www/html/soap/clear_fcm_verlegungen.php
+
+sudo cp /home/mstepping/newphp/passwords.php /var/www/html/soap/passwords.php
 
 
 Andere Befehle:

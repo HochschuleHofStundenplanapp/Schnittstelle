@@ -3,6 +3,7 @@
  * MySQL - Daten
  */
  
+require_once 'passwords.php';
 
 /* Unter Windows ist das Auflösen von localhost seit Vista sehr langsam, es wird wirklich eine DNS Abfrage getätigt 
 	
@@ -13,7 +14,7 @@
 $mysql_host = "localhost";
 $mysql_db = "t3_ext";
 $mysql_user = "appuser";
-$mysql_password = "Wer8%GreitY99#";
+$mysql_password = $appuserpassword;
 
 try {
     $pdo = new PDO("mysql:host=$mysql_host;dbname=$mysql_db;charset=utf8", $mysql_user, $mysql_password);
@@ -24,3 +25,4 @@ try {
     print 'Error!: ' . $e->getMessage() . '<br />';
     die();
 }
+?>

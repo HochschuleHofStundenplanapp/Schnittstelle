@@ -49,7 +49,7 @@ error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE | E_STRICT );
 }
 
 
-require "fcm_connect_db.php";
+require_once "fcm_connect_db.php";
 
 //BSP SQL-Injection
 //$login = $this->mysqli->real_escape_string( $login ) ;
