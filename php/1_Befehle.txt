@@ -19,6 +19,9 @@ Andere Befehle:
 Permission ändern:
 sudo chmod 740 /var/www/html/soap/fcm_update_and_send.php
 
+sudo chown -c www-data /var/www/html/soap/passwords.php
+sudo chmod 640 /var/www/html/soap/passwords.php
+
 
 FCM Befehle:
 ----------------------------------------------------------------------
