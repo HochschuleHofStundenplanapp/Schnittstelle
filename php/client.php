@@ -21,6 +21,7 @@ Testlinks:
 
 https://app.hof-university.de/soap/client.php?f=Schedule&stg=mc&sem=6&tt=SS&debug=1
 https://app.hof-university.de/soap/client.php?f=MySchedule&id[]=DigM%C2%A7aheda_2%2550468%20%24%202&debug=1
+https://app.hof-university.de/soap/client.php?f=Changes&id[]=DigM%C2%A7aheda_2%2550468%20%24%202
 
 */
 
