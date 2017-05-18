@@ -329,7 +329,6 @@ function getChanges($stgnr, $semester, $tt, $id) {
 		require 'connect_db.php';
 		
 		$param_select = array(
-			"v.id",
 			"v.Bezeichnung bezeichnung",
 			"IF (v.Anzeigen_int=0, v.InternetName, '') dozent",
 			"v.Tag_lang ausfalltag",
@@ -360,7 +359,8 @@ function getChanges($stgnr, $semester, $tt, $id) {
 		$sql = "SELECT ".implode(", ", $param_select)
 				." FROM Stundenplan_WWW as s INNER JOIN Verlegungen_WWW as v ON SUBSTRING_INDEX(s.SplusName, '$', '1')=SUBSTRING_INDEX(v.SplusVerlegungsname,'$','1')"
 				. " WHERE ".implode(" AND ", $param_where)
-				." ORDER BY ".implode(", ",$param_orderby);
+				." ORDER BY ".implode(", ",$param_orderby)
+				." GROUP BY "."v.SplusVerlegungsname";
 		$stmt = $pdo->prepare($sql);
 		$stmt->bindParam(':stgnr', $stgnr);
 		$stmt->bindParam(':semester', $semester);
@@ -369,7 +369,6 @@ function getChanges($stgnr, $semester, $tt, $id) {
 		while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
 			if($row['ausfallzeit']!= null){
 			$result[] = array(
-				"id"=>$row['id'],
 				"label"=>$row['bezeichnung'], 
 				"docent" => $row['dozent'],             
 				"comment"=>$row['kommentar'], 
