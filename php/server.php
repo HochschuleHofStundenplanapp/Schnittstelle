@@ -187,7 +187,6 @@ function getMySchedule($id)
 	    require_once 'connect_db.php';
 		
 		$param_select = array(
-			"sp.id",
 			"sp.Bezeichnung label",
 			"IF (sp.Anzeigen_int=0 , sp.InternetName, '') docent",
 			"sp.LV_Kurz type",
@@ -205,10 +204,11 @@ function getMySchedule($id)
 		$param_orderby=array("sp.Tag_Nr", "starttime");
 
 		
-		$sql = "SELECT ".implode(' , ', $param_select).
-				" FROM Stundenplan_WWW as sp "
-				. " WHERE ".implode(' AND ', $param_where).
-				" ORDER BY ".implode(' , ', $param_orderby);
+		$sql = "SELECT ".implode(' , ', $param_select)
+				." FROM Stundenplan_WWW as sp "
+				." WHERE ".implode(' AND ', $param_where)
+				." ORDER BY ".implode(' , ', $param_orderby)
+				." GROUP BY "."sp.SplusName";
 		$stmt = $pdo->prepare($sql);
 		$stmt->execute();
 		while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
