@@ -364,6 +364,15 @@ function getChanges($stgnr, $semester, $tt, $id) {
 				. " WHERE ".implode(" AND ", $param_where)
 				." GROUP BY v.SplusVerlegungsname"
 				." ORDER BY ".implode(", ",$param_orderby);
+				
+/*
+		SQL zum debuggen:
+			SELECT v.Bezeichnung, v.SplusVerlegungsname
+			FROM Stundenplan_WWW as s INNER JOIN Verlegungen_WWW as v ON SUBSTRING_INDEX(s.SplusName, '$', '1')=SUBSTRING_INDEX(v.SplusVerlegungsname,'$','1')
+			WHERE s.SplusName IN ('DigM§aheda_2%50468 $ 2') AND ((DATEDIFF(DATE(v.Ausfalldatum),NOW()) >= 0) OR (DATEDIFF(DATE(v.Ersatzdatum),NOW()) >= 0))
+			GROUP BY v.SplusVerlegungsname
+			ORDER BY v.Ausfalldatum
+*/
 		$stmt = $pdo->prepare($sql);
 		$stmt->bindParam(':stgnr', $stgnr);
 		$stmt->bindParam(':semester', $semester);
