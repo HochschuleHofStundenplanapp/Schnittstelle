@@ -209,8 +209,8 @@ function getMySchedule($id)
 		$sql = "SELECT ".implode(' , ', $param_select)
 				." FROM Stundenplan_WWW as sp "
 				." WHERE ".implode(' AND ', $param_where)
-				." ORDER BY ".implode(' , ', $param_orderby)
-				." GROUP BY "."sp.SplusName";
+				." GROUP BY sp.SplusName"
+				." ORDER BY ".implode(' , ', $param_orderby);
 		$stmt = $pdo->prepare($sql);
 		$stmt->execute();
 		while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) {
@@ -362,8 +362,8 @@ function getChanges($stgnr, $semester, $tt, $id) {
 		$sql = "SELECT ".implode(", ", $param_select)
 				." FROM Stundenplan_WWW as s INNER JOIN Verlegungen_WWW as v ON SUBSTRING_INDEX(s.SplusName, '$', '1')=SUBSTRING_INDEX(v.SplusVerlegungsname,'$','1')"
 				. " WHERE ".implode(" AND ", $param_where)
-				." ORDER BY ".implode(", ",$param_orderby)
-				." GROUP BY "."v.SplusVerlegungsname";
+				." GROUP BY v.SplusVerlegungsname"
+				." ORDER BY ".implode(", ",$param_orderby);
 		$stmt = $pdo->prepare($sql);
 		$stmt->bindParam(':stgnr', $stgnr);
 		$stmt->bindParam(':semester', $semester);
