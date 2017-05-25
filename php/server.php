@@ -18,7 +18,7 @@
 //require_once './mensa.php';        //Mensa deaktiviert!
 require_once 'classes.php';
 
-const __VERSIONNUMBER = 3.3;
+const __VERSIONNUMBER = 3.4;
 
 $server = new SoapServer(
         null, array(                    //Parameter	Bedeutung                       Priorität
@@ -140,7 +140,8 @@ function getSchedule($stgnr, $semester, $tt, $id){
 				"sp.Tag_lang day",
 				"sp.RaumNr room",
 				"sp.SplusName splusname",
-				"sp.Kommentar comment");
+				"sp.Kommentar comment",
+				"sp.SP sp");
 	    $param_where = array("(sg.STGNR = :stgnr)","(sp.Fachsemester = :semester)", "(sp.WS_SS = :tt)");
 	    $param_orderby=array("sp.Tag_Nr", "starttime");
     
@@ -200,7 +201,8 @@ function getMySchedule($id)
 			"sp.Tag_lang day",
 			"sp.RaumNr room",
 			"sp.SplusName splusname",
-			"sp.Kommentar comment");
+			"sp.Kommentar comment",
+			"sp.SP sp");
 		$param_where = array("sp.SplusName IN ('".implode("','", $id)."')");
 		$param_orderby=array("sp.Tag_Nr", "starttime");
 
@@ -246,7 +248,8 @@ function getMergedSchedule($stgnr, $semester, $tt, $id) {
 			"DATE_FORMAT(sp.Enddatum, '%d.%m.%Y') enddate",
 			"sp.Tag_lang day",
 			"sp.RaumNr room",
-			"sp.Kommentar comment");
+			"sp.Kommentar comment",
+			"sp.SP sp");
 		$param_where = array("(sg.STGNR = :stgnr)","(sp.Fachsemester = :semester)", "(sp.WS_SS = :tt)");
 		$param_orderby=array("sp.Tag_Nr", "starttime");     
 		if(!empty($id)){
