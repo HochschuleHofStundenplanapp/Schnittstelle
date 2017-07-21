@@ -23,7 +23,7 @@
   <div id="flash-message"></div>
 
 </nav>
-<div class="headsup">Version 3.1</div>
+<div class="headsup">Version 3.4</div>
 
 
 <div id="layout" class="clearfix">
@@ -35,6 +35,18 @@
   <p class="refpurpose"><span class="refname">Version 2</span> — <span class="dc-title">Neuer Übergabeparameter <strong>id</strong> wurde hinzugefügt.</span></p>
   <p class="refpurpose"><span class="refname">Version 3</span> — <span class="dc-title">Neuer Übergabeparameter <strong>tt</strong> wurde hinzugefügt.</span></p>
   <p class="refpurpose"><span class="refname">Version 3.1</span> — <span class="dc-title">Neue Funktion MySchedule verfügbar.</span></p>
+  <p class="refpurpose"><span class="refname">Version 3.2</span> — <span class="dc-title">Bei getMySchedule werden nun auch Comment mit übergeben<br />
+  Bei getChanges kann man nun auch eine Anfrage stellen mit nur ID's um für die ID's die Änderungen zu bekommen<br />
+  Fix das man auch Änderungen für das kommende Jahr bekommt</span></p>
+  <p class="refpurpose"><span class="refname">Version 3.3</span> — <span class="dc-title">Bei folgenden Methoden wird nun anstatt der ID's der Vorlesungen, nun der splusname der Vorlesungen mit übergeben:<br />
+  - getSchedule() (optionaler 4.ter Parameter)<br />
+  - getMySchedule()<br />
+  - getMergedSchedule() (optionaler 4.ter Parameter)<br />
+  - getChanges() (optionaler 4.ter Parameter)<br />
+  "type" beinhaltet nun Kürzel wie "FWPM", "AWPM" usw. Die vorherige Information von "type" (meistens einfach nur "Vorlesung"), heißt nun "style"<br />
+  Außerdem besteht die Möglichkeit sich für Push-Benachrichtigungen per FCM (Firebase Cloud Messaging) zu registrieren.</span></p>
+  <p class="refpurpose"><span class="refname">Version 3.4</span> — <span class="dc-title">Die Information sp wird nun mit übergeben.<br />
+  Sie beinhaltet "-" wenn keiner vorhanden ist und z.B. "SP (MB)" wenn ein SP vorhanden ist.</span></p>
  </div>
 
  <div class="refsect1 description">
@@ -78,7 +90,7 @@
       <dt><code class="parameter">id</code></dt>
       <dd>
           <p class="para">
-              Es werden nur noch die Datensätze angezeigt, dessen <strong><code>id</code></strong> im Array enthalten ist. Die Werte von <strong><code>id</code></strong> sind gleich der Datenbanktabelle <strong><code>Stundenplan_WWW.id</code></strong><br/>
+              Es werden nur noch die Datensätze angezeigt, dessen <strong><code>id</code></strong> im Array enthalten ist. Die Werte von <strong><code>id</code></strong> sind gleich der Datenbanktabelle <strong><code>Stundenplan_WWW.splusname</code></strong><br/>
               Mehrere ID's im URL: 
                <div class="example-contents">
             <div class="phpcode">
@@ -136,7 +148,9 @@
             "enddate": String Datum der letzten Vorlesung (dd.mm.yyyy),
             "day": String Wochentag,
             "room": String Raum,
-            "splusname": String SplusName
+            "splusname": String SplusName,
+			"comment": String Kommentar der Vorlesung,
+            "sp": String Die SP Information
         },
         {
             ...
@@ -162,7 +176,9 @@
             "enddate": String Datum der letzten Vorlesung (dd.mm.yyyy),
             "day": String Wochentag,
             "room": String Raum,
-            "splusname": String SplusName
+            "splusname": String SplusName,
+            "comment": String Kommentar der Vorlesung,
+            "sp": String Die SP Information
         },
         {
             ...
@@ -307,7 +323,9 @@
             "enddate": "19.12.2016",
             "day": "Montag",
             "room": "FA007",
-            "splusname": "TMS§vplenk_2+wuschold_1%45646\/45648 $ 2"
+            "splusname": "TMS§vplenk_2+wuschold_1%45646\/45648 $ 2",
+            "comment": "(Beginn ab KW 20)",
+            "sp": "-"
         },
         {
             ...
