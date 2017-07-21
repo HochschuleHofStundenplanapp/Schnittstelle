@@ -140,7 +140,8 @@
             "id": String Tabellen-ID,
             "label": String Vorlesungsbezeichner,
             "docent": String Dozentenname,
-            "type": String Art der Vorlesung,
+            "type": String Vorlesungs Typ, AWPM oder FWPM bei Wahlpflichtfächer, sonst HF,
+            "style": String Art der Vorlesung,
             "group": String Gruppe,
             "starttime": String Startzeitpunt der Vorlesung (HH:mm),
             "endtime": String Endzeitpunt der Vorlesung (HH:mm),
@@ -150,7 +151,7 @@
             "room": String Raum,
             "splusname": String SplusName,
 			"comment": String Kommentar der Vorlesung,
-            "sp": String Die SP Information
+            "sp": String Die SP Information, "-" wenn keiner vorhanden ist und z.B. "SP (MB)" wenn ein SP vorhanden ist
         },
         {
             ...
@@ -168,7 +169,8 @@
             "id": String Tabellen-ID,
             "label": String Vorlesungsbezeichner,
             "docent": String Dozentenname,
-            "type": String Art der Vorlesung,
+            "type": String Vorlesungs Typ, AWPM oder FWPM bei Wahlpflichtfächer, sonst HF,
+            "style": String Art der Vorlesung,
             "group": String Gruppe,
             "starttime": String Startzeitpunt der Vorlesung (HH:mm),
             "endtime": String Endzeitpunt der Vorlesung (HH:mm),
@@ -178,7 +180,7 @@
             "room": String Raum,
             "splusname": String SplusName,
             "comment": String Kommentar der Vorlesung,
-            "sp": String Die SP Information
+            "sp": String Die SP Information, "-" wenn keiner vorhanden ist und z.B. "SP (MB)" wenn ein SP vorhanden ist
         },
         {
             ...
@@ -228,7 +230,8 @@
         {
             "label": String Vorlesungsbezeichner,
             "docent": String Dozentenname,
-            "type": String Art der Vorlesung,
+            "type": String Vorlesungs Typ, AWPM oder FWPM bei Wahlpflichtfächer, sonst HF,
+            "style": String Art der Vorlesung,
             "group": String Gruppe,
             "starttime": String Startzeitpunt der Vorlesung (HH:mm),
             "endtime": String Endzeitpunt der Vorlesung (HH:mm),
@@ -236,6 +239,8 @@
             "enddate": String Datum der letzten Vorlesung (dd.mm.yyyy),
             "day": String Wochentag,
             "room": String Raum,
+			"comment": String Kommentar der Vorlesung,
+            "sp": String Die SP Information, "-" wenn keiner vorhanden ist und z.B. "SP (MB)" wenn ein SP vorhanden ist,
             "changes": {
                 "comment": String Kommentar zur Verlegung,
                 "reason": "String Grund der Verlegung,
@@ -315,7 +320,8 @@
             "id": "1332256",
             "label": "Technische Materialflusssysteme",
             "docent": "Prof. Dr. Valentin Plenk§§ Wolfgang Uschold",
-            "type": "Vorlesung Fixzeit",
+            "type": "FWPM",
+            "style": "Vorlesung Fixzeit",
             "group": "",
             "starttime": "08:00",
             "endtime": "09:30",
@@ -389,7 +395,8 @@
         {
             "label": "Medien- und Designrecht",
             "docent": "Prof. Dr. Beatrix Weber",
-            "type": "Vorlesung Fixzeit",
+            "type": "HF",
+            "style": "Vorlesung Fixzeit",
             "group": "",
             "starttime": "11:30",
             "endtime": "13:00",
@@ -397,6 +404,8 @@
             "enddate": "15.12.2016",
             "day": "Donnerstag",
             "room": "Mueb_335",
+            "comment": "(Beginn ab KW 20)",
+            "sp": "-",
             "changes": {
                 "comment": "14-tägig (Beginn KW 12)",
                 "reason": "Dienstlich",
