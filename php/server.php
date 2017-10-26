@@ -53,27 +53,13 @@ function getMenu(){
  */
 function getCourses($tt) {
     require_once 'connect_db.php';
-    
-    $param_select = array(
-        "sg.Bezeichnung",
-        "sg.Bezeichnung_en",
-        "sg.STGNR",
-        "sp.Fachsemester",
-        "sp.Jahr");
-    $param_where = array("(sp.WS_SS=:tt)");
-    $param_orderby=array("sg.Bezeichnung");
-    
-    $sql = "SELECT DISTINCT ".implode(' , ', $param_select)
-            ." FROM Stundenplan_WWW AS sp INNER JOIN Studiengaenge  AS sg ON sg.STGNR = sp.STGNR "
-            ." WHERE ".implode(' AND ', $param_where)
-            ." ORDER BY ".implode(' , ', $param_orderby);
 
 /*
     $sql = "SELECT DISTINCT sg.Bezeichnung, sg.Bezeichnung_en, sg.STGNR, sp.Fachsemester, sp.Jahr
             FROM Stundenplan_WWW AS sp INNER JOIN Studiengaenge  AS sg ON sg.STGNR = sp.STGNR 
             WHERE (sp.WS_SS='SS')
             ORDER BY sg.Bezeichnung;"
-    
+
 			Bezeichnung Bezeichnung_en STGNR Fachsemester Jahr
 			Berufsbegleitender Bachelor Betriebswirtschaft Business Administration (part-time) BBB 6 2017
 			Berufsbegleitender Bachelor Betriebswirtschaft Business Administration (part-time) BBB 8 2017
@@ -86,12 +72,15 @@ function getCourses($tt) {
 			Betriebswirtschaft Business Administration BW 4b 2017
 			Betriebswirtschaft Business Administration BW 1 2017
 
-*/		
+*/
+
+    // let's use our new stored procedures
+    $sql = "CALL GET_COURSES(:tt)"; // Bezeichnung, Bezeichnung_en, STGNR, Fachsemester, Jahr
 
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':tt', $tt);
     $stmt->execute();
-    
+
     $result = array();
     $arrSemester = array();
     while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) 
