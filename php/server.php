@@ -111,56 +111,37 @@ function getCourses($tt) {
  * @return type Array über alle Vorlesungen eines Studienganges in einem Semester. Die Einträge sind nach Wochentag und Startzeitpunkt sortiert.
  */
 function getSchedule($stgnr, $semester, $tt, $id){
-    $result = array();
-    if ( !empty($stgnr) && !empty($semester) && !empty($tt) )
-    {
-	    require 'connect_db.php';
-	    $param_select = array(
-				"sp.id",
-				"sp.Bezeichnung label",
-				"IF (sp.Anzeigen_int=0 , sp.InternetName, '') docent",
-				"sp.LV_Kurz type",
-				"sp.VArt style",
-				"sp.Gruppe 'group'",
-				"DATE_FORMAT(sp.AnfDatum, '%H:%i') starttime",
-				"DATE_FORMAT(sp.Enddatum, '%H:%i') endtime",
-				"DATE_FORMAT(sp.AnfDatum, '%d.%m.%Y') startdate",
-				"DATE_FORMAT(sp.Enddatum, '%d.%m.%Y') enddate",
-				"sp.Tag_lang day",
-				"sp.RaumNr room",
-				"sp.SplusName splusname",
-				"sp.Kommentar comment",
-				"sp.SP sp");
-	    $param_where = array("(sg.STGNR = :stgnr)","(sp.Fachsemester = :semester)", "(sp.WS_SS = :tt)");
-	    $param_orderby=array("sp.Tag_Nr", "starttime");
-    
-	    if( !empty($id) )
-	    {
-	    		// überschreiben des Parameters
-	        array_push($param_where, "sp.SplusName IN ('".implode("','", $id)."')");
-	    }
-    
-			$sql = "SELECT ".implode(' , ', $param_select)
-				." FROM Stundenplan_WWW AS sp JOIN Studiengaenge AS sg ON sg.STGNR = sp.STGNR "
-				." WHERE ".implode(' AND ', $param_where)
-				." ORDER BY ".implode(' , ', $param_orderby);
-			$stmt = $pdo->prepare($sql);
-			$stmt->bindParam(':stgnr', $stgnr);
-			$stmt->bindParam(':semester', $semester);
-			$stmt->bindParam(':tt', $tt);    
-			$stmt->execute();
-			while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) 
+	$result = array();
+	if ( !empty($stgnr) && !empty($semester) && !empty($tt) )
+	{
+		require 'connect_db.php';
+
+		$sql = "";
+
+		if( !empty($id) )
+		{
+			$sql = "CALL GET_SCHEDULE(:stgnr,:semester,:tt,:id);";
+		} else {
+			$sql = "CALL GET_SCHEDULE(:stgnr,:semester,:tt,NULL);";
+		}
+
+		$stmt = $pdo->prepare($sql);
+		$stmt->bindParam(':stgnr', $stgnr);
+		$stmt->bindParam(':semester', $semester);
+		$stmt->bindParam(':tt', $tt);
+		$stmt->bindParam(':id', $id);
+		$stmt->execute();
+		while (($row = $stmt->fetch(PDO::FETCH_ASSOC))) 
+		{
+			if ( ($row['starttime']!= null) 
+				&& ($row['endtime']!=null) )
 			{
-			    if ( ($row['starttime']!= null) 
-			    		&& ($row['endtime']!=null)
-			    		)
-			    {
-			        $result[] = $row;
-			    }
+				$result[] = $row;
 			}
-			$pdo = null;
-    }
-    return addGeneralInfos("schedule", $result);
+		}
+		$pdo = null;
+	}
+	return addGeneralInfos("schedule", $result);
 }
 
 /**

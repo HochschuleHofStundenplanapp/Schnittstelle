@@ -27,6 +27,8 @@ $pagehead = "<!DOCTYPE html><html><head><title>Database Initialization</title><m
 $pagefoot = "</ul></div></body></html>";
 $pagecontent = "<li>Version: ".__VERSIONNUMBER."</li>\n";
 
+require_once 'connect_db.php';
+
 /** debug output (or feedback output)
   *
   * this function collects all debug/feedback messages. Those will be printed on the screen.
@@ -49,7 +51,7 @@ function debug_output($msg)
   */
 function create_stoproc($call, $params, $implementation)
 {
-	require_once 'connect_db.php';
+	global $pdo;
 
 	$impl = rtrim($implementation, ';').';'; // make sure the implementation ends with a ;
 
@@ -87,6 +89,59 @@ function csp_getCourses()
 	create_stoproc("GET_COURSES", $sproc_params, $sql);
 }
 
+function csp_getSchedule()
+{
+	// code copied from server.php (and adjusted by sirjofri)
+	$param_select = array(
+		"sp.id",
+		"sp.Bezeichnung label",
+		"IF (sp.Anzeigen_int=0 , sp.InternetName, '') docent",
+		"sp.LV_Kurz type",
+		"sp.VArt style",
+		"sp.Gruppe 'group'",
+		"DATE_FORMAT(sp.AnfDatum, '%H:%i') starttime",
+		"DATE_FORMAT(sp.Enddatum, '%H:%i') endtime",
+		"DATE_FORMAT(sp.AnfDatum, '%d.%m.%Y') startdate",
+		"DATE_FORMAT(sp.Enddatum, '%d.%m.%Y') enddate",
+		"sp.Tag_lang day",
+		"sp.RaumNr room",
+		"sp.SplusName splusname",
+		"sp.Kommentar comment",
+		"sp.SP sp");
+	$param_where = array("(sg.STGNR = stgnr)","(sp.Fachsemester = semester)", "(sp.WS_SS = tt)");
+	$param_orderby=array("sp.Tag_Nr", "starttime");
+
+	// IF no ids
+	$sql = "IF given_ids=NULL THEN ";
+
+	// SELECT without ids
+	$sql .="SELECT ".implode(' , ', $param_select)
+	      ." FROM Stundenplan_WWW AS sp JOIN Studiengaenge AS sg ON sg.STGNR = sp.STGNR "
+	      ." WHERE ".implode(' AND ', $param_where)
+	      ." ORDER BY ".implode(' , ', $param_orderby).";"; // Note: ';' at the end of sql statement
+
+	// ELSE
+	$sql .= " ELSE ";
+
+	// überschreiben des Parameters
+	array_push($param_where, "sp.SplusName IN (given_ids)");
+
+	// SELECT with ids
+	$sql .="SELECT ".implode(' , ', $param_select)
+	      ." FROM Stundenplan_WWW AS sp JOIN Studiengaenge AS sg ON sg.STGNR = sp.STGNR "
+	      ." WHERE ".implode(' AND ', $param_where)
+	      ." ORDER BY ".implode(' , ', $param_orderby).";"; // Note: see above
+
+	$sql .= " END IF;";
+
+	$sproc_params = array("IN stgnr MEDIUMTEXT",
+	                      "IN semester MEDIUMTEXT",
+	                      "IN tt MEDIUMTEXT",
+	                      "IN given_ids MEDIUMTEXT");
+
+	create_stoproc("GET_SCHEDULE", implode(", ", $sproc_params), $sql);
+}
+
 /** initializes the database with stored procedures
   * 
   * this function uses the other declared functions to initialize the database with stored procedures
@@ -95,6 +150,7 @@ function init_db()
 {
 	global $pagehead, $pagecontent, $pagefoot;
 	csp_getCourses();
+	csp_getSchedule();
 
 	echo $pagehead.$pagecontent.$pagefoot;
 }

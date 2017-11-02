@@ -36,3 +36,8 @@ Beschreibung der Funktionen
 `GET_COURSES(tt:MEDIUMTEXT)` gibt eine Tabelle zurück. Die Spaltennamen
 entsprechen denen der Originale: `Bezeichnung`, `Bezeichnung_en`, `STGNR`,
 `Fachsemester`, `Jahr`.
+
+`GET_SCHEDULE(stgnr:MEDIUMTEXT, semester:MEDIUMTEXT, tt:MEDIUMTEXT,
+given_ids:MEDIUMTEXT)` gibt den Stundenplan zu den gegebenen Parametern
+zurück. `given_ids` ist optional, falls es nicht verwendet werden soll, ist
+`NULL` explizit mitzugeben!
