@@ -142,6 +142,37 @@ function csp_getSchedule()
 	create_stoproc("GET_SCHEDULE", implode(", ", $sproc_params), $sql);
 }
 
+function csp_getMySchedule()
+{
+	$param_select = array(
+	   "sp.id",
+	   "sp.Bezeichnung label",
+	   "IF (sp.Anzeigen_int=0 , sp.InternetName, '') docent",
+	   "sp.LV_Kurz type",
+	   "sp.VArt style",
+	   "sp.Gruppe 'group'",
+	   "DATE_FORMAT(sp.AnfDatum, '%H:%i') starttime",
+	   "DATE_FORMAT(sp.Enddatum, '%H:%i') endtime",
+	   "DATE_FORMAT(sp.AnfDatum, '%d.%m.%Y') startdate",
+	   "DATE_FORMAT(sp.Enddatum, '%d.%m.%Y') enddate",
+	   "sp.Tag_lang day",
+	   "sp.RaumNr room",
+	   "sp.SplusName splusname",
+	   "sp.Kommentar comment",
+	   "sp.SP sp");
+	$param_where = array("sp.SplusName IN (given_ids)"); // parameter given_ids
+	$param_orderby = array("sp.Tag_Nr", "starttime");
+
+	$sql = "SELECT ".implode(' , ', $param_select)
+	      ." FROM Stundenplan_WWW as sp "
+	      ." WHERE ".implode(' AND ', $param_where)
+	      ." ORDER BY ".implode(' , ', $param_orderby);
+
+	$sproc_params = array("IN given_ids MEDIUMTEXT");
+
+	create_stoproc("GET_MY_SCHEDULE", implode(", ", $sproc_params), $sql);
+}
+
 /** initializes the database with stored procedures
   * 
   * this function uses the other declared functions to initialize the database with stored procedures
@@ -151,6 +182,7 @@ function init_db()
 	global $pagehead, $pagecontent, $pagefoot;
 	csp_getCourses();
 	csp_getSchedule();
+	csp_getMySchedule();
 
 	echo $pagehead.$pagecontent.$pagefoot;
 }
