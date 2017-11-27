@@ -68,27 +68,40 @@ $con->close();
 // Funktionen
 // --------------------------------------------------------------------------------
 function sendNotification($vorlesung_id, $con, $label) {
-	$sql3 = "SELECT token FROM fcm_nutzer WHERE vorlesung_id = '".$vorlesung_id."'";
+
+	$sql3 = "SELECT token, os FROM fcm_nutzer WHERE vorlesung_id = '".$vorlesung_id."'";
+	//$sqlTokeniOS = "SELECT token FROM fcm_nutzer WHERE vorlesung_id = '".$vorlesung_id."' AND os = '1' ";		
+	
 	$mySQLresult3 = $con->query($sql3);
-	$tokenArray = array("");
+	$tokenArray = array({array(''),array('')});
 
 	//Alle Tokens auslesen und in $tokens speichern
 	if ($mySQLresult3->num_rows > 0) {
 	    //output data of each row
+	    int $count = O;
 	    while ($row = $mySQLresult3->fetch_assoc()) {
-	        if ($tokenArray[0] == '') {
+	        if ($tokenArray[0][0] == '') {
 				echo "Token leeres Feld: $row[token]\n";
-	            $tokenArray[0] = $row[token];
+	            $tokenArray[0][0] = $row[token];
+	            $tokenArray[0][1] = $row[os];
+	            $count++;
 	        }
 	        else {
 				echo "Token hinzufügen: $row[token]\n";
-	            array_push($tokenArray, $row[token]);
+	            array_push($tokenArray[$count], $row[token]);
+	            array_push($tokenArray[$count], $row[os]);
+	            $count++;
 	        }
-	    }
+	 	}
 		
 		//Nachricht senden mit jedem Token aufrufen
 		for($i=0; $i < count($tokenArray); $i++) {
-			sendGCM($tokenArray[$i], $label);
+			if ($tokenArray[i][1] == 0){
+				sendGCM($tokenArray[$i], $label);
+			}
+			else{
+				sendAPNS($tokenArray[i][0], $label)
+			}
 			echo($tokenArray[$i]."<br>");
 		}
 		echo "Notification an Vorlesung_id $vorlesung_id wurde gesendet!<br>\n";
@@ -138,5 +151,65 @@ function sendGCM($registration_ids, $label) {
     echo "Token wurde an Google Firebase übermittelt: ";
     //return output
     return $result;
+}
+function sendAPNS($deviceToken, $label){
+    
+    // My private key's passphrase here:
+    $passphrase = '';
+
+    $title =    "Neue Änderung";
+    $message = "für das Fach ".$label;
+
+    //badge
+    // if (is_int($badgeNumber))
+    //     $badge = $badge;
+    // else{
+    //     $badge = 0;
+    // }
+
+     
+    //create stream with public cert
+    $ctx = stream_context_create();
+    stream_context_set_option($ctx, 'ssl', 'local_cert', 'server_certificates_bundle_sandbox.pem');
+    stream_context_set_option($ctx, 'ssl', 'passphrase', $passphrase);
+
+    // Open a connection to the APNS server
+    $fp = stream_socket_client(
+          'ssl://gateway.sandbox.push.apple.com:2195', $err,
+          $errstr, 60, STREAM_CLIENT_CONNECT|STREAM_CLIENT_PERSISTENT, $ctx);
+
+    if (!$fp)
+        exit("Failed to connect: $err $errstr" . PHP_EOL);
+
+        echo 'Connected to APNS' . PHP_EOL;
+
+        // Create the payload body
+        $body['aps'] = array( 
+            'alert' => $message,
+            'sound' => 'newMessage.wav'
+        );
+        //###need badge management### 
+        $payload = array('aps' => array('alert' => array('title' => $title, 'body' => $message),'badge' => '1'));
+
+        $payloadJson = json_encode($payloadJson);
+
+        // Encode the payload as JSON
+        //$payload = json_encode($body);
+
+        // Build the binary notification
+        $msg = chr(0) . pack('n', 32) . pack('H*', $deviceToken) . pack('n', strlen($payloadJson)) . $payloadJson.pack('n');
+        
+        // Send it to the server
+        $result = fwrite($fp, $msg, strlen($msg));
+
+        if (!$result)
+            echo 'Error, notification not sent' . PHP_EOL;
+        else
+            echo 'notification sent!' . PHP_EOL;
+
+        // Close the connection to the server
+        fclose($fp);
+
+    }
 }
 ?>

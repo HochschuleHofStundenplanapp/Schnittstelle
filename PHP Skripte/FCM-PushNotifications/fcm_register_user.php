@@ -58,13 +58,26 @@ require_once "fcm_connect_db.php";
 $fcm_token = htmlentities( $_POST["fcm_token"] );
 // passiert hier weiter unten
 $lectureJSON = $_POST["vorlesung_id"];
+
+
+//###new post parameter### 
+$os = 0; // the default value of the os parameter is 0 -> android
+if(!empty($_POST["os"])){
+	$os = $_POST["os"];
+}
+
+
 $lectureArray = json_decode($lectureJSON,true);
+
+
 
 
 if ($debug) { echo "\nToken: $fcm_token\n\nlectureJSON: $lectureJSON\n";}
 
+
 //Alle Einträge mit diesem Token in DB löschen
-$sqldelete = "DELETE FROM fcm_nutzer WHERE token = \"$fcm_token\" ";
+//###update sql statment### 
+$sqldelete = "DELETE FROM fcm_nutzer WHERE token = \"$fcm_token\" AND os = \"$os\"";
 $con->query($sqldelete);
 
 //Tokens und Vorlesungn in DB eintragen
@@ -74,7 +87,7 @@ for ($i = 0; $i < count($lectureArray); $i++)
 	// da htmlentities falsch encodet filter_var genommen
 	$vorlesung_id = filter_var($lectureArray[$i]['vorlesung_id'], FILTER_SANITIZE_STRING);
 	if ($debug) { echo "\nVorlesung_id: $vorlesung_id\n";}
-	$sqlinsert = "INSERT INTO `fcm_nutzer`(`token`, `vorlesung_id`) VALUES (\"$fcm_token\",N'$vorlesung_id')";
+	$sqlinsert = "INSERT INTO `fcm_nutzer`(`token`, `vorlesung_id`,`os`) VALUES (\"$fcm_token\",N'$vorlesung_id',\"$os\")";
 	$con->query($sqlinsert);
 }
 
