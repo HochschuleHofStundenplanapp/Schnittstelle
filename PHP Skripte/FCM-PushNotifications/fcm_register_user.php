@@ -4,18 +4,18 @@
 
 Testlinks:
 
-https://app.hof-university.de/soap/fcm_register_user.php?debug=1
+https://app.hof-university.de/soap/fcm_register_user.php?debug=1&os=[0|1] // android = 0 ios = 1
 muss allerdings mit einem Tool wie z.B. Advanced Rest Client
 https://chrome.google.com/webstore/detail/advanced-rest-client/hgmloofddffdnphfgcellkdfbfbjeloo
 per POST aufgerufen werden und die folgende Variablen mit übergeben werden:
 - token (Der Token des Gerätes, zum testen einfach einen String)
 - id (die SplusName's der Vorlesungen, zum testen auch einfach einen oder mehere Strings)
-
+--> _new.php version with user agent and iOS register
 */
 
 
 /* we can request debug output to better find errors */
-$debug=0;
+$debug=1;
 if ( isset( $_REQUEST['debug'] ))
 {
 	$debug=1;
@@ -55,31 +55,97 @@ require_once "fcm_connect_db.php";
 //$login = $this->mysqli->real_escape_string( $login ) ;
 
 // Alle übergebeenen Parameter entwerten, um SQL-Injection aus dem Weg zu gehen
-$fcm_token = htmlentities( $_POST["fcm_token"] );
-// passiert hier weiter unten
-$lectureJSON = $_POST["vorlesung_id"];
-$lectureArray = json_decode($lectureJSON,true);
+// $pushToken = htmlentities( $_POST["fcm_token"] );
 
 
-if ($debug) { echo "\nToken: $fcm_token\n\nlectureJSON: $lectureJSON\n";}
+$language = null;
+
+
+// pass os number to os variable. value is 0 for android downward compatibility
+$os = htmlentities($_REQUEST['os']??0);
+error_log(print_r("OS-Type: ".$os, TRUE));
+
+
+// os choice: os parameter is 0 -> Android and 1 -> iOS
+if(!is_null($os) && $os == 0){ // for Android (0) and if there is no os parameter (downward compatibility)
+	
+	// Alle übergebeenen Parameter entwerten, um SQL-Injection aus dem Weg zu gehen
+	$pushToken = htmlentities( $_POST["fcm_token"]??null );
+	$lectureJSON = $_POST["vorlesung_id"]??null;
+	$language = $_POST["language"]??null;
+
+	// check if values are null.
+	if(!is_null($lectureJSON) && !is_null($pushToken) ){
+		$lectureArray = json_decode($lectureJSON,true);	
+	} else {
+		error_log(print_r("Android value is null!", TRUE));
+		echo "Android value is null!";
+		return "Android value is null!";
+	}
+/*
+	error_log("#---->");
+	error_log(print_r('Android-Token: '.$pushToken, TRUE));
+	error_log(print_r('Language: '.$language, TRUE));
+	error_log("<----#");
+*/
+	
+}else if($os == 1){ // for iOS (1)
+	$entitybody = file_get_contents("php://input");
+
+	$fullJSON = json_decode($entitybody, true);
+	$lectureArray = $fullJSON["vorlesung_id"];
+	$pushToken = $fullJSON["fcm_token"];
+	$language = $fullJSON["language"];
+} else {
+	error_log(print_r("Keine OS Zuordnung!", TRUE));
+	echo "Keine OS Zuordnung!";
+	return("Keine OS Zuordnung!");
+}
+
+
+// check if a null value is given. can happen if a user opens the scipt in a browser window.
+// can prevent null entries in database
+if(is_null($lectureArray) || is_null($pushToken) ){
+	echo "There is a null value!"; 
+	error_log(print_r("There is a null value!", TRUE));
+	return "There is a null value!"; 
+}
+
+
+// if ($debug) { echo "\nToken:". $pushToken ."\n\n lectureJSON: ". $lectureJSON ."\n";}
+
 
 //Alle Einträge mit diesem Token in DB löschen
-$sqldelete = "DELETE FROM fcm_nutzer WHERE token = \"$fcm_token\" ";
+$sqldelete = "DELETE FROM fcm_nutzer WHERE token = \"$pushToken\" AND os = \"$os\"";
 $con->query($sqldelete);
 
 //Tokens und Vorlesungn in DB eintragen
 for ($i = 0; $i < count($lectureArray); $i++) 
 {
-	// htmlentities wegen SQL-Injection
-	// da htmlentities falsch encodet filter_var genommen
-	$vorlesung_id = filter_var($lectureArray[$i]['vorlesung_id'], FILTER_SANITIZE_STRING);
-	if ($debug) { echo "\nVorlesung_id: $vorlesung_id\n";}
-	$sqlinsert = "INSERT INTO `fcm_nutzer`(`token`, `vorlesung_id`) VALUES (\"$fcm_token\",N'$vorlesung_id')";
-	$con->query($sqlinsert);
+	if($os == 0) { // for Android (0)
+		$vorlesung_id = filter_var($lectureArray[$i]['vorlesung_id'], FILTER_SANITIZE_STRING); // android
+	} else if($os == 1) { // for iOS (1)
+		$vorlesung_id = filter_var($lectureArray[$i], FILTER_SANITIZE_STRING); // ios
+	} else {
+		return "Error selecting correct lecture!";
+	}
+
+//	if ($debug) { echo "\nVorlesung_id: $vorlesung_id\n"; }
+
+	// this way you can add null values to cells like "language" w/o adding the letters "NULL" as a string. 
+	// Also you arn't getting crazy by concatenating strings like in the previous version :)
+	$stmt = $con->prepare("INSERT INTO fcm_nutzer (token, vorlesung_id, os, language) VALUES (?, ?, ?, ?)");
+	// ssis stands for the sequence of string and integer variables.
+	$stmt->bind_param('ssis', $pushToken, $vorlesung_id, $os, $language);
+
+	$stmt->execute();
+	// old way
+	//$sqlinsert = "INSERT INTO `fcm_nutzer`(`token`, `vorlesung_id`, `os`, `language`) VALUES (\"$pushToken\",N'$vorlesung_id',N'$os',\"$language\")";
+	//$con->query($sqlinsert);
 }
 
 // SQLi-Conncetion schließen
 $con->close();
-
+// error_log(print_r("DONE!", TRUE));
 return("Funktioniert!");
 ?>
