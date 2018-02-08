@@ -84,18 +84,10 @@ function sendNotification($vorlesung_id, $con, $label) {
 	    echo("count: ");
 	    echo(count($tokenArray));
 	    while ($row = $mySQLresult3->fetch_assoc()) {
-	        if (count($tokenArray) == 0) {
-		    echo "Token leeres Feld: $row[token]\n";
-	            $tokenArray[0][0] = $row["token"];
-	            $tokenArray[0][1] = $row["os"];
-	            $count++;
-	        }
-	        else {
-		    echo "Token hinzufügen: $row[os]\n";
-	            array_push($tokenArray[$count], $row["token"]);
-	            array_push($tokenArray[$count], $row["os"]);
-		
-	            $count++;
+		    	echo "Token hinzufügen: $row[os]\n";
+                $tokenArray[$count][0] = $row["token"];
+                $tokenArray[$count][1] = $row["os"];  
+                $count++;
 	        }
 	 	}
 		echo("for wird ausgeführt: $count\n");
