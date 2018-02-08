@@ -88,7 +88,6 @@ function sendNotification($vorlesung_id, $con, $label) {
                 $tokenArray[$count][0] = $row["token"];
                 $tokenArray[$count][1] = $row["os"];  
                 $count++;
-	        }
 	 	}
 		echo("for wird ausgeführt: $count\n");
 		//Nachricht senden mit jedem Token aufrufen. Unterscheidung zwischen 0 = Android/GCM und 1 = iOS
