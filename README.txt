@@ -14,12 +14,12 @@ Dateien:
 
 
 
-https://soapuser:F%98z&12@app.hof-university.de/soap/client.php?f=Schedule&stg=MC&sem=6&tt=SS&debug=1
+https://soapuser:password@app.hof-university.de/soap/client.php?f=Schedule&stg=MC&sem=6&tt=SS&debug=1
 
-https://soapuser:F%98z&12@app.hof-university.de/soap/client.php?f=Courses&tt=SS&debug=1
+https://soapuser:password@app.hof-university.de/soap/client.php?f=Courses&tt=SS&debug=1
 
 Dokumentation:
-https://soapuser:F%98z&12@app.hof-university.de/soap/docs.php
+https://soapuser:password@app.hof-university.de/soap/docs.php
 
 
 
@@ -75,7 +75,7 @@ Bericht über den bisherigen Stand der Dinge
 				
 
 			
-		
+F%98z&12 ... is the p...word
 
 
 
