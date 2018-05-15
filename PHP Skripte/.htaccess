@@ -1,0 +1,33 @@
+RewriteEngine On
+##das ist schlecht da erste authentifiziert wird ueber http und dann erst auf https umgeleitet wuerde
+##RewriteCond %{HTTPS} off
+##RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+##RewriteCond %{SERVER_PORT} !443
+##RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+
+# SSL erzwingen
+ SSLRequireSSL
+	
+# Zugriff auf die connect_db.php (mysql Datenbankverbindung) verbieten
+<Files connect_db.php>
+  order allow,deny
+  Deny from all
+</Files>
+
+# die client.php und server.php muss aufrufbar sein
+#<Files server.php>
+#  order allow,deny
+#  Deny from all
+#</Files>
+
+
+# Authentifizierung erforderlich
+Authtype Basic
+AuthName "Soap"
+AuthUserFile /var/www/soap/htpasswd
+Require valid-user
+
+# Verzeichnisinhalt von /soap deaktivieren
+Options -Indexes
