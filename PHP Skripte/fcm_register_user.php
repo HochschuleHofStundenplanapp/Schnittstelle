@@ -1,21 +1,10 @@
 <?php
 
-
 /*
-  ~ Copyright (c) 2016-2018 Hochschule Hof
-  ~ This program is free software: you can redistribute it and/or modify
-  ~ it under the terms of the GNU General Public License as published by
-  ~ the Free Software Foundation, either version 3 of the License, or
-  ~ (at your option) any later version.
-  ~
-  ~ This program is distributed in the hope that it will be useful,
-  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ~ GNU General Public License for more details.
-  ~
-  ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  */
+Implementation of iOS push notifications during our student project in Swift FWPM and Android FWPM in WS 2017/2018.
+By Johannes Franz and Normen Krug.
+Related documentation can be found in the V4 branch of "HochschuleHofHundenplanapp / iOS-App".
+*/
 
 
 /*
@@ -35,10 +24,8 @@ per POST aufgerufen werden und die folgende Variablen mit übergeben werden:
 /* we can request debug output to better find errors */
 $debug=0;
 if ( isset( $_REQUEST['debug'] ))
-	$debug = htmlentities($_REQUEST['debug']);
-	
-if ($debug)
 {
+	$debug=1;
 	mysqli_report(MYSQLI_REPORT_ALL);
 
 	ini_set('mysql.trace_mode',  'On' );
@@ -62,14 +49,14 @@ if ($debug)
 	ini_set('mysqli.slow_query_log','on');
 	ini_set('mysqli.log_error_verbosity','3');
 
-	// E_NOTICE ist sinnvoll um uninitialisierte oder
-	// falsch geschriebene Variablen zu entdecken
-	error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE | E_STRICT );
+// E_NOTICE ist sinnvoll um uninitialisierte oder
+// falsch geschriebene Variablen zu entdecken
+error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE | E_STRICT );
 
 }
 
 
-require_once 'fcm_connect_db.php';
+require_once "fcm_connect_db.php";
 
 //BSP SQL-Injection
 //$login = $this->mysqli->real_escape_string( $login ) ;
@@ -80,37 +67,23 @@ require_once 'fcm_connect_db.php';
 
 $language = null;
 
-const ANDROID=0;
-const IOS=1;
 
 // pass os number to os variable. value is 0 for android downward compatibility
-$os = ANDROID;
-
-if ( isset($_REQUEST['os'] ) )
-	$os = htmlentities($_REQUEST['os']);
-
-// Plausibilisierung der Apps
-if ( $os == ANDROID || $os == IOS )
-	; // ok
-else
-{
-	error_log(print_r("OS-Type: ".$os, TRUE));
-	exit;
-}
+$os = htmlentities($_REQUEST['os']??0);
+error_log(print_r("OS-Type: ".$os, TRUE));
 
 
 // os choice: os parameter is 0 -> Android and 1 -> iOS
-if( $os == ANDROID )
-{ // for Android (0) and if there is no os parameter (downward compatibility)
+if(!is_null($os) && $os == 0){ // for Android (0) and if there is no os parameter (downward compatibility)
 	
 	// Alle übergebeenen Parameter entwerten, um SQL-Injection aus dem Weg zu gehen
 	$pushToken = htmlentities( $_POST["fcm_token"]??null );
-	$lectureJSON = htmlentities( $_POST["vorlesung_id"]??null );
-	$language = htmlentities( $_POST["language"]??null );
+	$lectureJSON = $_POST["vorlesung_id"]??null;
+	$language = $_POST["language"]??null;
 
 	// check if values are null.
 	if(!is_null($lectureJSON) && !is_null($pushToken) ){
-		$lectureArray = json_decode($lectureJSON, true);	
+		$lectureArray = json_decode($lectureJSON,true);	
 	} else {
 		error_log(print_r("Android value is null!", TRUE));
 		echo "Android value is null!";
@@ -123,8 +96,7 @@ if( $os == ANDROID )
 	error_log("<----#");
 */
 	
-}else if($os == IOS ){ // for iOS (1)
-	
+}else if($os == 1){ // for iOS (1)
 	$entitybody = file_get_contents("php://input");
 
 	$fullJSON = json_decode($entitybody, true);
@@ -157,9 +129,9 @@ $con->query($sqldelete);
 //Tokens und Vorlesungn in DB eintragen
 for ($i = 0; $i < count($lectureArray); $i++) 
 {
-	if($os == ANDROID) { // for Android (0)
+	if($os == 0) { // for Android (0)
 		$vorlesung_id = filter_var($lectureArray[$i]['vorlesung_id'], FILTER_SANITIZE_STRING); // android
-	} else if($os == IOS) { // for iOS (1)
+	} else if($os == 1) { // for iOS (1)
 		$vorlesung_id = filter_var($lectureArray[$i], FILTER_SANITIZE_STRING); // ios
 	} else {
 		return "Error selecting correct lecture!";

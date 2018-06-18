@@ -19,26 +19,16 @@
 
 Testlinks:
 
-Soap  Wer8%GreitY99#
-
-https://app.hof-university.de/soap/client.php?f=Courses&stg=mc&sem=6&tt=SS&debug=1
 https://app.hof-university.de/soap/client.php?f=Schedule&stg=mc&sem=6&tt=SS&debug=1
 https://app.hof-university.de/soap/client.php?f=MySchedule&id[]=DigM%C2%A7aheda_2%2550468%20%24%202&debug=1
-
-
-https://soapuser:F%98z&12@sl-app01.hof-university.de/soap/client.php?f=Schedule&stg=mc&sem=6&tt=SS
 
 */
 
 /* we can request debug output to better find errors */
-
-/* we can request debug output to better find errors */
 $debug=0;
 if ( isset( $_REQUEST['debug'] ))
-	$debug = htmlentities($_REQUEST['debug']);
-	
-if ($debug)
 {
+	$debug=1;
 	mysqli_report(MYSQLI_REPORT_ALL);
 
 	ini_set('mysql.trace_mode',  'On' );
@@ -62,9 +52,9 @@ if ($debug)
 	ini_set('mysqli.slow_query_log','on');
 	ini_set('mysqli.log_error_verbosity','3');
 
-	// E_NOTICE ist sinnvoll um uninitialisierte oder
-	// falsch geschriebene Variablen zu entdecken
-	error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE | E_STRICT );
+// E_NOTICE ist sinnvoll um uninitialisierte oder
+// falsch geschriebene Variablen zu entdecken
+error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE | E_STRICT );
 
 }
 

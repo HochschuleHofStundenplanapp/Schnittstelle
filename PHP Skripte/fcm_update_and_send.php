@@ -1,8 +1,16 @@
 <?php
 
+/*
+Implementation of iOS push notifications during our student project in Swift FWPM and Android FWPM in WS 2017/2018.
+By Johannes Franz and Normen Krug.
+Related documentation can be found in the V4 branch of "HochschuleHofHundenplanapp / iOS-App".
+*/
+
+
 require_once "fcm_connect_db.php";
 require_once "server.php";
 require_once "apnsPushIOS.php";
+
 
 
 error_log(print_r("Script fcm_update_and_send.php Beginn", TRUE));
@@ -30,8 +38,6 @@ echo "Es wurden ".count($vorlesung_ids)." vorlesungs_ids durchsucht!\n";
 for ($i=0; $i < count($vorlesung_ids); $i++) { 
 	$response = getChanges("","","",array($vorlesung_ids[$i]));
 	$countChanges = count($response['changes']);
-
-//	echo "-------------------------------------------\n\n";
 
 	if($countChanges > 0){
 		echo "Für die vorlesungs_id ".$vorlesung_ids[$i]." \nliegen $countChanges Änderungen vor!\n";
@@ -92,17 +98,20 @@ function sendNotification($vorlesung_id, $con, $label) {
 	            $count++;
 	    }
 		echo("for wird ausgeführt: $count\n");
+		error_log(print_r("Count: " . $count . " times " . $label . ":", TRUE));
 		//Nachricht senden mit jedem Token aufrufen. Unterscheidung zwischen 0 = Android/GCM und 1 = iOS
 		for($i=0; $i < $count; $i++) {
-			//error_log(print_r("++++ PUSH for an os type ++++ <br>", TRUE));
 			echo("++++ PUSH as echo ++++<br>\n");                            
-			if ($tokenArray[$i][1] == 0){
-                                
-				error_log(print_r("++++ PUSH FCM ++++ ".$label." - for token: ".$tokenArray[$i][0], TRUE));
-				sendGCM($tokenArray[$i][0], $label);
+			if ($tokenArray[$i][1] == 0){                                
+				error_log(print_r("PUSH FCM: " . $vorlesung_id . " - ".$label." - for token: ".$tokenArray[$i][0], TRUE));
+				try {
+					sendGCM($tokenArray[$i][0], $label);
+				} catch (Exception $e) {
+					error_log(print_r("catch exception e: ".$e, TRUE));
+				}
 			}
 			else{
-				 error_log(print_r("++++ PUSH Apple iOS ++++ ".$label." - for token: ".$tokenArray[$i][0], TRUE));	     			
+				error_log(print_r("PUSH iOS: " . $vorlesung_id . " - ".$label." - for token: ".$tokenArray[$i][0], TRUE));
 				try {
 					sendIosPush("Neue Änderung für das Fach", $label, $tokenArray[$i][0]);
 				} catch (Exception $e) {
@@ -122,7 +131,7 @@ function sendNotification($vorlesung_id, $con, $label) {
 function sendGCM($registration_ids, $label) {
     //titel und message der Notification
     $title =    "Neue Änderung";
-    $message =  "für das Fach ".$label;
+    $message =  "Fach ".$label;
 
     //FCM URL
     $url = "https://fcm.googleapis.com/fcm/send";
