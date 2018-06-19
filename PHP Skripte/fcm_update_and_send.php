@@ -1,14 +1,30 @@
 <?php
 
-require_once "fcm_connect_db.php";
-require_once "server.php";
-require_once "apnsPushIOS.php";
+/*
+  ~ Copyright (c) 2016-2018 Hochschule Hof
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
 
+/* wird vom Cron-Job aus aufgerufen */
 
-error_log(print_r("Script fcm_update_and_send.php Beginn", TRUE));
+require_once 'fcm_connect_db.php';
+require_once 'server.php';
+require_once 'apnsPushIOS.php';
 
+$debug=0;
 
-$sql = "SELECT vorlesung_id FROM fcm_nutzer GROUP BY vorlesung_id";
+$sql = 'SELECT vorlesung_id FROM fcm_nutzer GROUP BY vorlesung_id';
 $mySQLresult = $con->query($sql);
 $vorlesung_ids = array();
 
@@ -28,6 +44,7 @@ echo "Es wurden ".count($vorlesung_ids)." vorlesungs_ids durchsucht!\n";
 
 //Es werden zu jeder vorlesung_id die verlegung_id's geholt
 for ($i=0; $i < count($vorlesung_ids); $i++) { 
+	
 	$response = getChanges("","","",array($vorlesung_ids[$i]));
 	$countChanges = count($response['changes']);
 
@@ -71,43 +88,57 @@ $con->close();
 
 // Funktionen
 // ----------------------------------------------------------------------
-function sendNotification($vorlesung_id, $con, $label) {
+function sendNotification( & $vorlesung_id, & $con, & $label) {
+
+	global $debug;
+	
+	/* label: Beschreibung der Änderung, mehrsprachig, t.b.d. */
 
 	$sql3 = "SELECT token, os FROM fcm_nutzer WHERE vorlesung_id = '".$vorlesung_id."'";
 	
 	$mySQLresult3 = $con->query($sql3);
 	$tokenArray = array(array(), array());
 	
-
 	//Alle Tokens auslesen und in $tokens speichern
 	if ($mySQLresult3->num_rows > 0) {
+		
 	    //output data of each row
 	    $count = 0;
 	    echo("count: ");
 	    echo(count($tokenArray));
 	    while ($row = $mySQLresult3->fetch_assoc()) {
 		    echo "Token hinzufügen: $row[os] \n";
-		    $tokenArray[$count][0] = $row["token"];
-		    $tokenArray[$count][1] = $row["os"];  
-	            $count++;
+		    $tokenArray[$count][0] = $row['token'];
+		    $tokenArray[$count][1] = $row['os'];  
+	    	$count++;
 	    }
 		echo("for wird ausgeführt: $count\n");
 		//Nachricht senden mit jedem Token aufrufen. Unterscheidung zwischen 0 = Android/GCM und 1 = iOS
 		for($i=0; $i < $count; $i++) {
-			//error_log(print_r("++++ PUSH for an os type ++++ <br>", TRUE));
+			
+			if ($debug) error_log(print_r("++++ PUSH for an os type ++++ <br>", TRUE));
 			echo("++++ PUSH as echo ++++<br>\n");                            
+			
+			// Android
 			if ($tokenArray[$i][1] == 0){
-                                
-				error_log(print_r("++++ PUSH FCM ++++ ".$label." - for token: ".$tokenArray[$i][0], TRUE));
+            	if ($debug) error_log(print_r("++++ PUSH FCM!! ++++<br>\n", TRUE));
+            	
+            	// Token, Label
 				sendGCM($tokenArray[$i][0], $label);
 			}
-			else{
-				 error_log(print_r("++++ PUSH Apple iOS ++++ ".$label." - for token: ".$tokenArray[$i][0], TRUE));	     			
-				try {
-					sendIosPush("Neue Änderung für das Fach", $label, $tokenArray[$i][0]);
-				} catch (Exception $e) {
-					error_log(print_r("catch exception e: ".$e, TRUE));
-				}
+			// IOS
+			else if ($tokenArray[$i][1] == 1)
+			{
+				if ($debug) error_log(print_r("++++ PUSH iOS!! ++++<br>\n", TRUE));	     			
+				
+				// Titel, Body, Token
+				// TODO Language
+				sendIosPush( "Neue Änderung für das Fach", $label, $tokenArray[$i][0]);
+			}
+			else
+			{
+				error_log(print_r("++++ PUSH wrong OS!! ++++<br>\n", TRUE));	     			
+				exit;
 			}
 			echo("Token: " . $tokenArray[$i][0]."<br>");
 		}
@@ -119,7 +150,7 @@ function sendNotification($vorlesung_id, $con, $label) {
 }
 
 //SendGoogleCloudMessage
-function sendGCM($registration_ids, $label) {
+function sendGCM( & $registration_ids, & $label) {
     //titel und message der Notification
     $title =    "Neue Änderung";
     $message =  "für das Fach ".$label;
@@ -160,5 +191,4 @@ function sendGCM($registration_ids, $label) {
     return $result;
 }
 
-error_log(print_r("Script fcm_update_and_send.php Ende", TRUE));
 ?>
