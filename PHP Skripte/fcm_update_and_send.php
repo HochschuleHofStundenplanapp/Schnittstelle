@@ -16,6 +16,13 @@
   ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   */
 
+  /*
+Implementation of iOS push notifications during our student project in Swift FWPM and Android FWPM in WS 2017/2018.
+By Johannes Franz and Normen Krug.
+Related documentation can be found in the V4 branch of "HochschuleHofHundenplanapp / iOS-App".
+*/
+
+
 /* wird vom Cron-Job aus aufgerufen */
 
 require_once 'fcm_connect_db.php';
@@ -24,7 +31,9 @@ require_once 'apnsPushIOS.php';
 
 $debug=0;
 
-$sql = 'SELECT vorlesung_id FROM fcm_nutzer GROUP BY vorlesung_id';
+error_log(print_r("Script fcm_update_and_send.php Beginn", TRUE));
+
+$sql = "SELECT vorlesung_id FROM fcm_nutzer GROUP BY vorlesung_id";
 $mySQLresult = $con->query($sql);
 $vorlesung_ids = array();
 
@@ -47,8 +56,6 @@ for ($i=0; $i < count($vorlesung_ids); $i++) {
 	
 	$response = getChanges("","","",array($vorlesung_ids[$i]));
 	$countChanges = count($response['changes']);
-
-//	echo "-------------------------------------------\n\n";
 
 	if($countChanges > 0){
 		echo "Für die vorlesungs_id ".$vorlesung_ids[$i]." \nliegen $countChanges Änderungen vor!\n";
@@ -89,7 +96,6 @@ $con->close();
 // Funktionen
 // ----------------------------------------------------------------------
 function sendNotification( & $vorlesung_id, & $con, & $label) {
-
 	global $debug;
 	
 	/* label: Beschreibung der Änderung, mehrsprachig, t.b.d. */
@@ -108,8 +114,8 @@ function sendNotification( & $vorlesung_id, & $con, & $label) {
 	    echo(count($tokenArray));
 	    while ($row = $mySQLresult3->fetch_assoc()) {
 		    echo "Token hinzufügen: $row[os] \n";
-		    $tokenArray[$count][0] = $row['token'];
-		    $tokenArray[$count][1] = $row['os'];  
+		    $tokenArray[$count][0] = $row["token"];
+		    $tokenArray[$count][1] = $row["os"];  
 	    	$count++;
 	    }
 		echo("for wird ausgeführt: $count\n");
@@ -120,20 +126,24 @@ function sendNotification( & $vorlesung_id, & $con, & $label) {
 			echo("++++ PUSH as echo ++++<br>\n");                            
 			
 			// Android
-			if ($tokenArray[$i][1] == 0){
-            	if ($debug) error_log(print_r("++++ PUSH FCM!! ++++<br>\n", TRUE));
-            	
-            	// Token, Label
-				sendGCM($tokenArray[$i][0], $label);
+			if ($tokenArray[$i][1] == 0){error_log(print_r("PUSH FCM: " . $vorlesung_id . " - ".$label." - for token: ".$tokenArray[$i][0], TRUE));
+				try {
+					// Token, Label
+					sendGCM($tokenArray[$i][0], $label);
+				} catch (Exception $e) {
+					error_log(print_r("catch exception e: ".$e, TRUE));
+				}
 			}
 			// IOS
 			else if ($tokenArray[$i][1] == 1)
 			{
-				if ($debug) error_log(print_r("++++ PUSH iOS!! ++++<br>\n", TRUE));	     			
-				
-				// Titel, Body, Token
-				// TODO Language
-				sendIosPush( "Neue Änderung für das Fach", $label, $tokenArray[$i][0]);
+				if ($debug) error_log(print_r("PUSH iOS: " . $vorlesung_id . " - ".$label." - for token: ".$tokenArray[$i][0], TRUE));     			
+				try {
+					// Titel, Body, Token
+					sendIosPush("Neue Änderung für das Fach", $label, $tokenArray[$i][0]);
+				} catch (Exception $e) {
+					error_log(print_r("catch exception e: ".$e, TRUE));
+				}
 			}
 			else
 			{
@@ -153,7 +163,7 @@ function sendNotification( & $vorlesung_id, & $con, & $label) {
 function sendGCM( & $registration_ids, & $label) {
     //titel und message der Notification
     $title =    "Neue Änderung";
-    $message =  "für das Fach ".$label;
+    $message =  "Fach ".$label;
 
     //FCM URL
     $url = "https://fcm.googleapis.com/fcm/send";
@@ -190,5 +200,5 @@ function sendGCM( & $registration_ids, & $label) {
     //return output
     return $result;
 }
-
+error_log(print_r("Script fcm_update_and_send.php Ende", TRUE));
 ?>
